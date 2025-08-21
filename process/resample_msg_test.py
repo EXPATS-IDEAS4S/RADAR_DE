@@ -27,7 +27,7 @@ from time import sleep
 from progress.bar import Bar
 import time
 import pandas as pd
-
+import shutil
 
 def main():
 
@@ -341,15 +341,19 @@ def process_date(yy,mm,dd, plotting,path_out):
                 "target_grid": "MSG-like regular grid"
             }
         )
-
-        ds_RR_msg.to_netcdf(os.path.join(path_out, date+'_RR_15min_msg_res.nc'))
+        # store and compress RR variable to maximum compression
+        ds_RR_msg.to_netcdf(os.path.join(path_out, date+'_RR_15min_msg_res.nc'), encoding={'RR': {'zlib': True, 'complevel': 9}})
 
     else:
         
         print('file RR at msh res exists - reading it ')
         # read stored ncdf
         ds_RR_msg = xr.open_dataset(os.path.join(path_out, date+'_RR_15min_msg_res.nc'))    
-        
+
+    # gzip the file
+    with open(os.path.join(path_out, date+'_RR_15min_msg_res.nc'), 'rb') as f_in:
+        with gzip.open(os.path.join(path_out, date+'_RR_15min_msg_res.nc.gz'), 'wb') as f_out:
+            shutil.copyfileobj(f_in, f_out)
 
     # PLOT
     if plotting:
