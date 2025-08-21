@@ -8814,3 +8814,203 @@ Time taken for loop iteration 94: 8.90 seconds
 regrid RR for time  2023-05-19T23:45:00.000000000
 Time taken for loop iteration 95: 8.92 seconds
 Time taken to upload files:  0.9149835109710693
+file name of file uploaded on bucket 20230519_RR_15min_msg_res.nc
+file uploaded to bucket
+2023 05 20
+generating ncdf file for  20230520
+processing date to resample RR 20230520
+file RR at msg res not existing - resampling now
+Time taken for resampling to msg: 8.08 seconds
+regrid RR for time  2023-05-20T00:00:00.000000000
+Time taken for loop iteration 0: 8.94 seconds
+regrid RR for time  2023-05-20T00:15:00.000000000
+Time taken for loop iteration 1: 8.90 seconds
+regrid RR for time  2023-05-20T00:30:00.000000000
+Time taken for loop iteration 2: 8.90 seconds
+regrid RR for time  2023-05-20T00:45:00.000000000
+Time taken for loop iteration 3: 8.85 seconds
+regrid RR for time  2023-05-20T01:00:00.000000000
+Time taken for loop iteration 4: 8.90 seconds
+regrid RR for time  2023-05-20T01:15:00.000000000
+Time taken for loop iteration 5: 8.87 seconds
+regrid RR for time  2023-05-20T01:30:00.000000000
+Time taken for loop iteration 6: 8.71 seconds
+regrid RR for time  2023-05-20T01:45:00.000000000
+Time taken for loop iteration 7: 8.84 seconds
+regrid RR for time  2023-05-20T02:00:00.000000000
+Time taken for loop iteration 8: 8.93 seconds
+regrid RR for time  2023-05-20T02:15:00.000000000
+Time taken for loop iteration 9: 8.94 seconds
+regrid RR for time  2023-05-20T02:30:00.000000000
+Time taken for loop iteration 10: 9.13 seconds
+regrid RR for time  2023-05-20T02:45:00.000000000
+Time taken for loop iteration 11: 9.10 seconds
+regrid RR for time  2023-05-20T03:00:00.000000000
+Time taken for loop iteration 12: 8.93 seconds
+regrid RR for time  2023-05-20T03:15:00.000000000
+Time taken for loop iteration 13: 8.92 seconds
+regrid RR for time  2023-05-20T03:30:00.000000000
+Time taken for loop iteration 14: 8.90 seconds
+regrid RR for time  2023-05-20T03:45:00.000000000
+Time taken for loop iteration 15: 8.93 seconds
+regrid RR for time  2023-05-20T04:00:00.000000000
+Time taken for loop iteration 16: 8.87 seconds
+regrid RR for time  2023-05-20T04:15:00.000000000
+Time taken for loop iteration 17: 8.85 seconds
+regrid RR for time  2023-05-20T04:30:00.000000000
+Time taken for loop iteration 18: 8.90 seconds
+regrid RR for time  2023-05-20T04:45:00.000000000
+Time taken for loop iteration 19: 8.85 seconds
+regrid RR for time  2023-05-20T05:00:00.000000000
+Time taken for loop iteration 20: 8.89 seconds
+regrid RR for time  2023-05-20T05:15:00.000000000
+Time taken for loop iteration 21: 8.88 seconds
+regrid RR for time  2023-05-20T05:30:00.000000000
+Time taken for loop iteration 22: 8.80 seconds
+regrid RR for time  2023-05-20T05:45:00.000000000
+Time taken for loop iteration 23: 8.86 seconds
+regrid RR for time  2023-05-20T06:00:00.000000000
+Time taken for loop iteration 24: 8.90 seconds
+regrid RR for time  2023-05-20T06:15:00.000000000
+Time taken for loop iteration 25: 8.90 seconds
+regrid RR for time  2023-05-20T06:30:00.000000000
+Time taken for loop iteration 26: 8.87 seconds
+regrid RR for time  2023-05-20T06:45:00.000000000
+Time taken for loop iteration 27: 8.88 seconds
+regrid RR for time  2023-05-20T07:00:00.000000000
+Time taken for loop iteration 28: 8.88 seconds
+regrid RR for time  2023-05-20T07:15:00.000000000
+Time taken for loop iteration 29: 8.88 seconds
+regrid RR for time  2023-05-20T07:30:00.000000000
+Time taken for loop iteration 30: 8.87 seconds
+regrid RR for time  2023-05-20T07:45:00.000000000
+Time taken for loop iteration 31: 8.91 seconds
+regrid RR for time  2023-05-20T08:00:00.000000000
+Time taken for loop iteration 32: 8.87 seconds
+regrid RR for time  2023-05-20T08:15:00.000000000
+Time taken for loop iteration 33: 8.82 seconds
+regrid RR for time  2023-05-20T08:30:00.000000000
+Time taken for loop iteration 34: 8.88 seconds
+regrid RR for time  2023-05-20T08:45:00.000000000
+Time taken for loop iteration 35: 8.87 seconds
+regrid RR for time  2023-05-20T09:00:00.000000000
+Time taken for loop iteration 36: 8.88 seconds
+regrid RR for time  2023-05-20T09:15:00.000000000
+Time taken for loop iteration 37: 8.87 seconds
+regrid RR for time  2023-05-20T09:30:00.000000000
+Time taken for loop iteration 38: 9.05 seconds
+regrid RR for time  2023-05-20T09:45:00.000000000
+Time taken for loop iteration 39: 9.15 seconds
+regrid RR for time  2023-05-20T10:00:00.000000000
+Time taken for loop iteration 40: 9.13 seconds
+regrid RR for time  2023-05-20T10:15:00.000000000
+Time taken for loop iteration 41: 8.82 seconds
+regrid RR for time  2023-05-20T10:30:00.000000000
+Time taken for loop iteration 42: 8.87 seconds
+regrid RR for time  2023-05-20T10:45:00.000000000
+Time taken for loop iteration 43: 8.92 seconds
+regrid RR for time  2023-05-20T11:00:00.000000000
+Time taken for loop iteration 44: 8.88 seconds
+regrid RR for time  2023-05-20T11:15:00.000000000
+Time taken for loop iteration 45: 8.85 seconds
+regrid RR for time  2023-05-20T11:30:00.000000000
+Time taken for loop iteration 46: 8.82 seconds
+regrid RR for time  2023-05-20T11:45:00.000000000
+Time taken for loop iteration 47: 8.83 seconds
+regrid RR for time  2023-05-20T12:00:00.000000000
+Time taken for loop iteration 48: 8.89 seconds
+regrid RR for time  2023-05-20T12:15:00.000000000
+Time taken for loop iteration 49: 8.92 seconds
+regrid RR for time  2023-05-20T12:30:00.000000000
+Time taken for loop iteration 50: 8.91 seconds
+regrid RR for time  2023-05-20T12:45:00.000000000
+Time taken for loop iteration 51: 8.88 seconds
+regrid RR for time  2023-05-20T13:00:00.000000000
+Time taken for loop iteration 52: 8.86 seconds
+regrid RR for time  2023-05-20T13:15:00.000000000
+Time taken for loop iteration 53: 8.88 seconds
+regrid RR for time  2023-05-20T13:30:00.000000000
+Time taken for loop iteration 54: 8.82 seconds
+regrid RR for time  2023-05-20T13:45:00.000000000
+Time taken for loop iteration 55: 8.86 seconds
+regrid RR for time  2023-05-20T14:00:00.000000000
+Time taken for loop iteration 56: 8.91 seconds
+regrid RR for time  2023-05-20T14:15:00.000000000
+Time taken for loop iteration 57: 9.15 seconds
+regrid RR for time  2023-05-20T14:30:00.000000000
+Time taken for loop iteration 58: 9.12 seconds
+regrid RR for time  2023-05-20T14:45:00.000000000
+Time taken for loop iteration 59: 8.96 seconds
+regrid RR for time  2023-05-20T15:00:00.000000000
+Time taken for loop iteration 60: 8.84 seconds
+regrid RR for time  2023-05-20T15:15:00.000000000
+Time taken for loop iteration 61: 8.91 seconds
+regrid RR for time  2023-05-20T15:30:00.000000000
+Time taken for loop iteration 62: 8.91 seconds
+regrid RR for time  2023-05-20T15:45:00.000000000
+Time taken for loop iteration 63: 8.88 seconds
+regrid RR for time  2023-05-20T16:00:00.000000000
+Time taken for loop iteration 64: 8.82 seconds
+regrid RR for time  2023-05-20T16:15:00.000000000
+Time taken for loop iteration 65: 8.87 seconds
+regrid RR for time  2023-05-20T16:30:00.000000000
+Time taken for loop iteration 66: 8.89 seconds
+regrid RR for time  2023-05-20T16:45:00.000000000
+Time taken for loop iteration 67: 8.91 seconds
+regrid RR for time  2023-05-20T17:00:00.000000000
+Time taken for loop iteration 68: 8.84 seconds
+regrid RR for time  2023-05-20T17:15:00.000000000
+Time taken for loop iteration 69: 8.91 seconds
+regrid RR for time  2023-05-20T17:30:00.000000000
+Time taken for loop iteration 70: 8.90 seconds
+regrid RR for time  2023-05-20T17:45:00.000000000
+Time taken for loop iteration 71: 8.90 seconds
+regrid RR for time  2023-05-20T18:00:00.000000000
+Time taken for loop iteration 72: 8.93 seconds
+regrid RR for time  2023-05-20T18:15:00.000000000
+Time taken for loop iteration 73: 8.90 seconds
+regrid RR for time  2023-05-20T18:30:00.000000000
+Time taken for loop iteration 74: 8.89 seconds
+regrid RR for time  2023-05-20T18:45:00.000000000
+Time taken for loop iteration 75: 8.82 seconds
+regrid RR for time  2023-05-20T19:00:00.000000000
+Time taken for loop iteration 76: 8.91 seconds
+regrid RR for time  2023-05-20T19:15:00.000000000
+Time taken for loop iteration 77: 8.89 seconds
+regrid RR for time  2023-05-20T19:30:00.000000000
+Time taken for loop iteration 78: 8.93 seconds
+regrid RR for time  2023-05-20T19:45:00.000000000
+Time taken for loop iteration 79: 8.90 seconds
+regrid RR for time  2023-05-20T20:00:00.000000000
+Time taken for loop iteration 80: 8.81 seconds
+regrid RR for time  2023-05-20T20:15:00.000000000
+Time taken for loop iteration 81: 8.86 seconds
+regrid RR for time  2023-05-20T20:30:00.000000000
+Time taken for loop iteration 82: 8.88 seconds
+regrid RR for time  2023-05-20T20:45:00.000000000
+Time taken for loop iteration 83: 8.90 seconds
+regrid RR for time  2023-05-20T21:00:00.000000000
+Time taken for loop iteration 84: 8.91 seconds
+regrid RR for time  2023-05-20T21:15:00.000000000
+Time taken for loop iteration 85: 8.91 seconds
+regrid RR for time  2023-05-20T21:30:00.000000000
+Time taken for loop iteration 86: 8.99 seconds
+regrid RR for time  2023-05-20T21:45:00.000000000
+Time taken for loop iteration 87: 8.96 seconds
+regrid RR for time  2023-05-20T22:00:00.000000000
+Time taken for loop iteration 88: 8.89 seconds
+regrid RR for time  2023-05-20T22:15:00.000000000
+Time taken for loop iteration 89: 9.03 seconds
+regrid RR for time  2023-05-20T22:30:00.000000000
+Time taken for loop iteration 90: 8.84 seconds
+regrid RR for time  2023-05-20T22:45:00.000000000
+Time taken for loop iteration 91: 8.85 seconds
+regrid RR for time  2023-05-20T23:00:00.000000000
+Time taken for loop iteration 92: 8.90 seconds
+regrid RR for time  2023-05-20T23:15:00.000000000
+Time taken for loop iteration 93: 8.82 seconds
+regrid RR for time  2023-05-20T23:30:00.000000000
+Time taken for loop iteration 94: 8.90 seconds
+regrid RR for time  2023-05-20T23:45:00.000000000
+Time taken for loop iteration 95: 8.89 seconds
+Time taken to upload files:  1.0614478588104248
