@@ -31,7 +31,8 @@ import shutil
 import gzip
 
 from figures.plotting import plot_msg, plot_radar_mapV2
-from readers.data_buckets_funcs import upload_to_bucket
+from readers.data_buckets_funcs import upload_to_bucket, check_file_bucket
+from process.utils import generate_regular_grid, regrid_data, is_valid_date
 
 def main():
 
@@ -59,7 +60,7 @@ def main():
                 if is_valid_date(yy, mm, dd):
                     
                     # check if the file is already on the bucket
-                    file_exist = check_file_bucket(yy+mm+dd+'_RR_15min_msg_res.nc')
+                    file_exist = check_file_bucket(yy+mm+dd+'_RR_15min_msg_res.nc.gz')
                     
                     if file_exist:
                         print('file already exists on bucket - skipping date:', yy, mm, dd)
@@ -102,47 +103,6 @@ def main():
 
 
 
-def check_file_bucket(file2find):
-    """code to check if a file is on the bucket
-    input:
-    file2find: filename with path to find n bucket
-    return:
-    filefound (boolean) true if file is found, false if file is not on the bucket
-    """
-    
-    from readers.s3_buckets_credentials import S3_BUCKET_NAME, S3_ACCESS_KEY, S3_SECRET_ACCESS_KEY, S3_ENDPOINT_URL
-    from readers.data_buckets_funcs import Initialize_s3_client, upload_file
-    
-    import boto3
-    
-    s3 = boto3.client(
-    's3',
-    endpoint_url=S3_ENDPOINT_URL,
-    aws_access_key_id=S3_ACCESS_KEY,
-    aws_secret_access_key=S3_SECRET_ACCESS_KEY)
-    
-    # List the objects in our bucket
-    response = s3.list_objects(Bucket=S3_BUCKET_NAME)
-    
-    # set flag to false if file is not found
-    filefound = False
-    if "Contents" not in response:
-        print(f"No files on bucket")
-        
-    
-    # loop on files found on bucket
-    for obj in response["Contents"]:
-        key = obj["Key"]
-        if key == file2find:
-            filefound = True
-            return filefound
-        else:
-            continue
-
-    return filefound
-
-
-    
 
 def process_date(yy,mm,dd, plotting,path_out):
     '''
@@ -330,13 +290,6 @@ def process_date(yy,mm,dd, plotting,path_out):
                 bar.next()
 
     return(date+'_RR_15min_msg_res.nc.gz')
-
-from process.utils import generate_regular_grid, regrid_data, is_valid_date
-
-
-
-
-
 
 
 

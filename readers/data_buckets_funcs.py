@@ -4,6 +4,65 @@ import os
 import logging
 from botocore.exceptions import ClientError
 
+def list_files_bucket(s3, S3_BUCKET_NAME):
+    """
+    script to list files in the bucket
+    - s3: bucket to be checked
+    
+    """
+    # List the objects in our bucket
+    response = s3.list_objects(Bucket=S3_BUCKET_NAME)
+    
+    # set flag to false if file is not found
+    filefound = False
+    if "Contents" not in response:
+        print(f"No files on bucket")
+        return([])
+    else:
+        return(response["Contents"])
+    
+
+
+def check_file_bucket(file2find):
+    """code to check if a file is on the bucket
+    input:
+    file2find: filename with path to find n bucket
+    return:
+    filefound (boolean) true if file is found, false if file is not on the bucket
+    """
+    
+    from readers.s3_buckets_credentials import S3_BUCKET_NAME, S3_ACCESS_KEY, S3_SECRET_ACCESS_KEY, S3_ENDPOINT_URL
+    from readers.data_buckets_funcs import Initialize_s3_client, upload_file
+    
+    import boto3
+    
+    s3 = boto3.client(
+    's3',
+    endpoint_url=S3_ENDPOINT_URL,
+    aws_access_key_id=S3_ACCESS_KEY,
+    aws_secret_access_key=S3_SECRET_ACCESS_KEY)
+    
+    # List the objects in our bucket
+    response = s3.list_objects(Bucket=S3_BUCKET_NAME)
+    
+    # set flag to false if file is not found
+    filefound = False
+    if "Contents" not in response:
+        print(f"No files on bucket")
+        
+    
+    # loop on files found on bucket
+    for obj in response["Contents"]:
+        key = obj["Key"]
+        if key == file2find:
+            filefound = True
+            return filefound
+        else:
+            continue
+
+    return filefound
+
+
 
 
 
@@ -111,15 +170,14 @@ def upload_file(s3_client, file_name, bucket, object_name=None):
     return True
 
 # function to download data from bucket
-def download_from_s3():
+def download_from_s3(outpath, S3_ACCESS_KEY, S3_SECRET_ACCESS_KEY, S3_ENDPOINT_URL, S3_BUCKET_NAME):
     import os
     import boto3
     import logging
     from botocore.exceptions import ClientError
     from datetime import datetime
     import sys
-    from readers.s3_buckets_credentials import S3_ACCESS_KEY, S3_SECRET_ACCESS_KEY, S3_ENDPOINT_URL
-    S3_BUCKET_NAME = 'expats-radar-germany'
+
     
     s3 = boto3.client(
         's3',
@@ -128,7 +186,6 @@ def download_from_s3():
         aws_secret_access_key=S3_SECRET_ACCESS_KEY
     )
     
-    outpath = '/net/ostro/radolan_5min_composites/'
     os.makedirs(outpath, exist_ok=True)
     
     years = [2023]
@@ -138,7 +195,7 @@ def download_from_s3():
         for month in months:
             for day in days:
                 #prefix = f"output/data/timeseries_crops/{year:04d}/{month:02d}/{day:02d}/MSG_timeseries_{year:04d}-{month:02d}-{day:02d}_"
-                prefix = f"/net/ostro/radolan_5min_composites/{year}{month:02d}{day:02d}_RR_15min_msg_res.nc" #f"/data/sat/msg/ml_train_crops/IR_108-WV_062-CMA_FULL_EXPATS_DOMAIN/{year}/{month:02d}/merged_MSG_CMSAF_{year}-{month:02d}-{day:02d}.nc"
+                prefix = f"{year}{month:02d}{day:02d}_RR_15min_msg_res.nc" #f"/data/sat/msg/ml_train_crops/IR_108-WV_062-CMA_FULL_EXPATS_DOMAIN/{year}/{month:02d}/merged_MSG_CMSAF_{year}-{month:02d}-{day:02d}.nc"
                 try:
                     response = s3.list_objects_v2(
                         Bucket=S3_BUCKET_NAME,
