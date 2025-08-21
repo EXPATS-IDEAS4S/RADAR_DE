@@ -38,7 +38,7 @@ def main():
     # list all years from 2024 to 2014
     yy_list = [str(year) for year in range(2023, 2021, -1)]
     # list all months in a year
-    mm_list = [f'{month:02d}' for month in range(4, 9)]
+    mm_list = [f'{month:02d}' for month in range(4, 10)]
     # list all days in a month
     dd_list = [f'{day:02d}' for day in range(1, 32)]
     print(yy_list, mm_list, dd_list)
@@ -390,7 +390,7 @@ def process_date(yy,mm,dd, plotting,path_out):
 
                 bar.next()
 
-    return(date+'_RR_15min_msg_res.nc')
+    return(date+'_RR_15min_msg_res.nc.gz')
 
 
 def generate_regular_grid(lat_min, lat_max, lon_min, lon_max, step_deg, path=None):
