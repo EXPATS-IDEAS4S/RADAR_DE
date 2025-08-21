@@ -28,7 +28,7 @@ from progress.bar import Bar
 import time
 import pandas as pd
 import shutil
-
+import gzip
 def main():
 
     # download_from_s3()
@@ -346,7 +346,7 @@ def process_date(yy,mm,dd, plotting,path_out):
 
     else:
         
-        print('file RR at msh res exists - reading it ')
+        print('file RR at msg res exists - reading it ')
         # read stored ncdf
         ds_RR_msg = xr.open_dataset(os.path.join(path_out, date+'_RR_15min_msg_res.nc'))    
 

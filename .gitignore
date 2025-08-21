@@ -1,7 +1,7 @@
 # environments
 .sat_enviroment
 radar_env/
-
+.venv
 
 
 # Byte-compiled / optimized / DLL files
