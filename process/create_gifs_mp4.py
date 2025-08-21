@@ -5,7 +5,6 @@ import pandas as pd
 
 
 def main():
-    
 
     # set the day to plot
     yy = '2022'
