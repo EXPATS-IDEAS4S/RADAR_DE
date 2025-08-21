@@ -5,6 +5,45 @@ import logging
 from botocore.exceptions import ClientError
 
 
+
+
+def upload_to_bucket(path_out, filename_ncdf):
+    """
+    function to upload on a specified S3 bucket the filename ncdf
+
+    Args:
+        path_out (string): path to the directory where filename_ncdf is located 
+        filename_ncdf (string): name of the file to upload on bucket
+
+    Returns:
+        check: boolean, true if file is uploaded, false if not
+    """
+    
+    import time
+    from glob import glob
+
+    from readers.s3_buckets_credentials import S3_BUCKET_NAME, S3_ACCESS_KEY, S3_SECRET_ACCESS_KEY, S3_ENDPOINT_URL
+    from readers.data_buckets_funcs import Initialize_s3_client, upload_file
+
+
+    start_time = time.time()
+
+    # initialize the S3 client to upload the data to bucket
+    s3 = Initialize_s3_client(S3_ENDPOINT_URL, S3_ACCESS_KEY, S3_SECRET_ACCESS_KEY)
+
+    # calling upload function and return boolean for upload status
+    # upload_file(s3_client, file_name, bucket, object_name=None):
+    file_to_upload = os.path.join(path_out, filename_ncdf)
+    check = upload_file(s3, file_to_upload, S3_BUCKET_NAME, filename_ncdf)
+    
+    # if true, upload done
+    if check:
+        print("Time taken to upload files: ", time.time() - start_time, flush=True) 
+        print('file name of file uploaded on bucket', filename_ncdf)
+
+    return check
+    
+
 # method to initialize the S3 client
 def Initialize_s3_client(S3_ENDPOINT_URL, S3_ACCESS_KEY, S3_SECRET_ACCESS_KEY):
     """Initialize the S3 client
