@@ -41,7 +41,7 @@ def main():
     # set the day to process
     
     # list all years from 2024 to 2014
-    yy_list = [str(year) for year in range(2023, 2021, -1)]
+    yy_list = [str(year) for year in range(2020, 2018, -1)]
     # list all months in a year
     mm_list = [f'{month:02d}' for month in range(4, 10)]
     # list all days in a month
@@ -74,9 +74,22 @@ def main():
                         
                         # set path out
                         path_out = '/net/ostro/radolan_5min_composites/'
-                    
-                        # check that radar file from DWD exists 
+                        path_tar = '/data/trade_pc/radolan_DE_5min_rain_rate/'
+                        
+                        # check if there folder exists, otherwise unzip tar.gz file
+                        if not os.path.exists(path_tar+'/'+yy+'/'):
+                            
+                            print('unzipping tar.gz file for year ', yy)
+                            
+                            # unzip the tar.gz file
+                            tar_filename =  path_tar+'YW2017.002_'+yy+'_netcdf.tar.gz'
+                            print('unzipping file ', tar_filename)
+                            shutil.unpack_archive(tar_filename, path_tar)
+
+                        # check that radar file from DWD exists
                         if os.path.exists('/data/trade_pc/radolan_DE_5min_rain_rate/'+yy+'/'+mm+'/YW_2017.002_'+yy+mm+dd+'.nc'):
+                            
+                            print('radolan file already unzipped - running processing')
                             
                             # run processing to create interpolated radolan radar data on msg time/space res. returns filename created
                             ncdf_radar_gz = process_date(yy, mm, dd, plotting, path_out)
@@ -104,10 +117,14 @@ def main():
                         else:
                             print('file not uploaded to bucket - abort')
                             break
-
-
-
-
+        # tar the radolan files again to save space
+        if os.path.exists(path_tar+'/'+yy+'/'):
+            print('tar and gzip radolan files for year ', yy)
+            shutil.make_archive(path_tar+'YW2017.002_'+yy+'_netcdf', 'gztar', path_tar+yy+'/')
+            # remove the unzipped folder to save space
+            shutil.rmtree(path_tar+'/'+yy+'/')
+            print('removing unzipped folder to save space')
+        
 
 def process_date(yy, mm, dd, plotting, path_out):
     '''
