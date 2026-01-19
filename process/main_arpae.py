@@ -55,6 +55,8 @@ def read_radar_ARPAE(path_arpae_DE, yyyy, mm, dd):
             data.append(key)
         else:
             continue
+    
+    # 
     return(data)
 
 
@@ -69,6 +71,8 @@ def main():
     data = read_radar_ARPAE(path_ARPAE, yyyy, mm, dd)
     print(data) 
     print(len(data))
+
+
 
 if __name__ == "__main__":
     main()
