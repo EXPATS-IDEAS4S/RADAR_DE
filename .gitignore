@@ -11,10 +11,15 @@ readers/__pycache__/
 
 
 # file containing credentials
-credentials.py
-readers/s3_buckets_credentials.py
-
+readers/s3_bucket_credentials.py
 
 # files monitoring running processes
+
+# files for presentation and output
 radar_de_process_2023_2022.txt
 bash_script_out.txt
+plots/*.png
+plots/*.mp4
+*.nc
+*.pptx
+*.npy

@@ -1,6 +1,10 @@
 """
-This code has the goal to resample the radar data from DWD ( 5 min rainfall in kgm-2 provided at 5 min temporal resolution and 1kmx1km grid (see link: https://opendata.dwd.de/climate_environment/CDC/help/landing_pages/doi_landingpage_RADKLIM_RW_V2017.002-en.html) to the msg satellite temporal and spatial resolution (15 min and 0.04 degrees )
-It then stores the ncdf data on the expats-radar-germany data bucket on EWC from EUMETSAT with filenames of the form yyyymmdd_RR_15min_msg_res.nc.
+This code has the goal to resample the radar data from DWD ( 5 min rainfall in kgm-2 provided at 5 min temporal 
+resolution and 1kmx1km grid 
+(see link: https://opendata.dwd.de/climate_environment/CDC/help/landing_pages/doi_landingpage_RADKLIM_RW_V2017.002-en.html) 
+to the msg satellite temporal and spatial resolution (15 min and 0.04 degrees )
+It then stores the ncdf data on the expats-radar-germany data bucket on EWC from 
+EUMETSAT with filenames of the form yyyymmdd_RR_15min_msg_res.nc.
 The code is done to process data from 2023 to 2013
 
 author: Claudia Acquistapace

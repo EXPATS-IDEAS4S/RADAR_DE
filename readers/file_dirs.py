@@ -9,10 +9,10 @@ path_arpae_DE = "/data/trade_pc/ARPAE_DE_5min_rain_rate/"
 
 
 # output path for plots
-path_out = "/data/trade_pc/ARPAE_DE_5min_rain_rate/plots/". #'/work/radolan_5min_composites/'
+path_out = "/data/trade_pc/ARPAE_DE_5min_rain_rate/plots/" #'/work/radolan_5min_composites/'
 
 
 # file containing orography for expats domain
-orography_file = '/net/ostro/figs_proposal_TEAMX/orography_expats_high_res.nc'
+orography_file = '/Users/claudia/Documents/Data/orography_expats_high_res.nc'
 
 

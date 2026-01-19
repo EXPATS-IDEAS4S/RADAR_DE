@@ -3,6 +3,8 @@ import boto3
 import os
 import logging
 from botocore.exceptions import ClientError
+from readers.config import *
+
 
 def list_files_bucket(s3, S3_BUCKET_NAME):
     """
@@ -138,6 +140,35 @@ def read_file(s3, file_name, bucket):
         logging.error(e)
         return None
     return myObject
+
+
+def init_s3():
+    """
+    Initializes and returns an S3 client using the provided credentials and endpoint.
+    """
+
+    return boto3.client(
+        's3',
+        endpoint_url=S3_ENDPOINT_URL,
+        aws_access_key_id=S3_ACCESS_KEY,
+        aws_secret_access_key=S3_SECRET_ACCESS_KEY, 
+    )
+
+
+
+def read_file_obj(s3, file_path, bucket):
+
+    # print all files in the bucket for debugging
+    #all_files = print_list_files_in_bucket(s3, bucket)
+    # example: /data/sat/msg/ml_train_crops/IR_108-WV_062-CMA_FULL_EXPATS_DOMAIN/2025/08/merged_MSG_CMSAF_2025-08-22.nc
+
+    try:
+        obj = s3.get_object(Bucket=bucket, Key=file_path)
+        return obj['Body'].read()
+    except ClientError as e:
+        logging.warning(f"Failed to read file {file_path}: {e}")
+        return None
+
 
 def list_objects(s3, S3_BUCKET_NAME):
     # List the objects in our bucket

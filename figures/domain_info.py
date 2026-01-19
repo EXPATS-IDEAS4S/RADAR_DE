@@ -13,4 +13,3 @@ domain_expats       =  [ 5.,   16.,    42.,   51.5 ] # minlon, maxlon, minlat, m
 domain_DE_CA        =  [ 7.5,  13.,    47.5,  51.0]  # minlon, maxlon, minlat, maxlat
 
 domain = domain_expats
-print(domain)
