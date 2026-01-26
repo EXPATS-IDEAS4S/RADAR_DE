@@ -33,6 +33,7 @@ import cartopy.feature as cfeature
 from readers.file_dirs import path_radolan_DE
 from readers.radar_DWD import read_radar_DWD, read_orography
 from readers.config import *
+from readers.data_buckets_funcs import upload_to_bucket, check_file_bucket
 from readers.config import S3_BUCKET_NAME, S3_ACCESS_KEY, S3_SECRET_ACCESS_KEY, S3_ENDPOINT_URL
 from figures.domain_info import domain_expats, domain_IT_CA
 from figures.one_day_video import plot_radar_map
@@ -43,7 +44,6 @@ from readers.file_dirs import orography_file
 from readers.data_buckets_funcs import read_file_obj, init_s3, upload_file
 from readers.data_buckets_funcs import download_from_s3
 from figures.one_day_video import plot_radar_map
-from readers.data_buckets_funcs import upload_to_bucket, check_file_bucket
 
 def ze_to_rr(ze, a=200, b=1.6):
     """
@@ -111,6 +111,36 @@ def read_all_filenames_from_bucket():
         return s3, file_names
 
 
+def calc_acc_rain_5_min(Ze_5_min):
+    """
+    function to calculate accumulated rain over 5 min intervals from Ze data
+    input:
+        Ze_5_min: 3D array of Ze data with shape (time, lat, lon)
+
+    The function first converts Ze from dbZ to mm6/mm3, then applies the Z-R relationship to convert Ze to RR, which is then the rain 
+    rate that would occur if conditions observed for the 5 min period would persist for 1 hour.
+    Finally, it converts the rain rate in mm/h to accumulated rainfall over the given time step, which is 5 min
+    Input:
+        Ze_5_min: 3D array of Ze data with shape (time, lat, lon) in dBZ.
+    output:
+        RR_acc_5_min: 3D array of accumulated rain over 5 min intervals with shape (time, lat, lon)
+    """
+
+    # convert Ze from dBZ to mm6/mm3
+    Z_5min_lin = 10 ** (Ze_5_min / 10)
+
+    # apply Z-R relationship to convert Ze to RR in mm/h
+    RR_5_min = (Z_5min_lin / 200) ** (1 / 1.6)  # using Marshall-Palmer relationship
+
+    # convert RR in mm/h to accumulated rainfall over 5 min
+    RR_acc_5_min = RR_5_min * (5 / 60)  # converting from mm/h to mm over 5 min
+
+    # set to zero all negative values
+    RR_acc_5_min[RR_acc_5_min < 0] = np.nan
+
+    return RR_acc_5_min
+
+
 def main():
 
     # output path for processed files
@@ -133,175 +163,190 @@ def main():
             for dd in dd_list:
                 
                 # print the date to process
-                print(yyyy, mm, dd)
+                print(f"processing date: {yyyy}-{mm}-{dd}")
+
+                # process only if the date is valid
+                if is_valid_date(yyyy, mm, dd):
+                    
+                    # check if the file is already on the bucket
+                    file_exist = check_file_bucket(yyyy+mm+dd+'_RR_IT_15min_msg_res.nc.gz', domain='IT')
+
+                    if file_exist:
+                        print('file already exists on bucket - skipping date:', yyyy, mm, dd)
+                        continue
+                    else: 
+
+                        print('new file - processing')
    
-                # sort filenames of the day and extract dates
-                data = sorted(file_names) # get all filenames from the bucket
-                dates = [datetime.strptime(f.split("_")[-1].split(".")[0], "%Y%m%d%H%M") for f in data] # extract dates from filenames
+                        # sort filenames of the day and extract dates
+                        data = sorted(file_names) # get all filenames from the bucket 
+                        dates = [datetime.strptime(f.split("_")[-1].split(".")[0], "%Y%m%d%H%M") for f in data] # extract dates from filenames
 
-                # select only dates of the specified day
-                data = [f for f, date in zip(data, dates) if date.year == int(yyyy) and date.month == int(mm) and date.day == int(dd)]
-                dates = [date for date in dates if date.year == int(yyyy) and date.month == int(mm) and date.day == int(dd)]
+                        # select only dates of the specified day
+                        data = [f for f, date in zip(data, dates) if date.year == int(yyyy) and date.month == int(mm) and date.day == int(dd)]
+                        dates = [date for date in dates if date.year == int(yyyy) and date.month == int(mm) and date.day == int(dd)]
 
-                print(f"Number of files found for the day {yyyy}-{mm}-{dd}: {len(data)}")
+                        print(f"Number of files found for the day {yyyy}-{mm}-{dd}: {len(data)}")
 
-                if len(data) == 0:
-                    print("No files found for the specified day. Exiting.")
-                    return
-                else:
+                        if len(data) == 0:
+                            print("No files found for the specified day. Exiting.")
+                            # add date to a log file: if the file already exists, append to it
+                            with open('log_no_data_days_ARPAE.txt', 'a') as log_file:
+                                log_file.write(f"{yyyy}-{mm}-{dd}\n")
 
-                    # unzip files, read data and create xr dataset for the entire day
-                    ds_list = []
+                            return
+                        else:
 
-                    for i, file in enumerate(data):
+                            # unzip files, read data and create xr dataset for the entire day
+                            ds_list = []
 
-                        # create string of the date with format with 4 digits for year, 2 for month, 2 for day, 2 for hour, 2 for minute
-                        date_process = dates[i].strftime("%Y%m%d%H%M")
-                        print(f"Processing file {i+1} of {len(data)}: {file} for date {date_process}")
+                            for i, file in enumerate(data):
 
-                        # read file object from S3 bucket
-                        file_obj = read_file_obj(s3, file, S3_BUCKET_NAME)
+                                # create string of the date with format with 4 digits for year, 2 for month, 2 for day, 2 for hour, 2 for minute
+                                date_i = dates[i].strftime("%Y%m%d%H%M")
+                                    
+                                print(f"Processing file {i+1} of {len(data)}: {file} for date {date_i}")
 
-                        if file_obj is not None:
+                                # read file object from S3 bucket
+                                file_obj = read_file_obj(s3, file, S3_BUCKET_NAME)
 
-                            # decompress gzip file object
-                            ds = xr.open_dataset(io.BytesIO(gzip.decompress(file_obj)))
+                                if file_obj is not None:
 
-                            # append to list
-                            ds_list.append(ds)
+                                    # decompress gzip file object
+                                    ds = xr.open_dataset(io.BytesIO(gzip.decompress(file_obj)))
 
-                    # concatenate all datasets along time dimension of the day
-                    ds_day = xr.concat(ds_list, dim="time")
+                                    # append to list
+                                    ds_list.append(ds)
 
-                    # add time coordinate
-                    ds_day = ds_day.assign_coords(time=("time", dates))
+                            # define date string for the day being processed
+                            date_process = f"{yyyy}{mm}{dd}_"
 
-                    # substitute values of Z_60 < -10 dBZ with NaN
-                    ds_day["Z_60"] = ds_day["Z_60"].where(ds_day["Z_60"] >= -10., np.nan)
+                            # concatenate all datasets along time dimension of the day
+                            ds_day = xr.concat(ds_list, dim="time")
 
-                    # convert Ze to RR by applying the Z-R relationship of function ze_to_rr
-                    ds_day["RR"] = (("time", "lat", "lon"), ze_to_rr(ds_day["Z_60"].values))
+                            # add time coordinate
+                            ds_day = ds_day.assign_coords(time=("time", dates))
 
-                    # resample dataset to 15 min intervals by summing up rain rates
-                    ds_radar_msg = ds_day.resample(time='15T').sum(skipna=True)
-                    
-                    # read one msg file to get temporal and spatial resolution
-                    ds_msg = xr.open_dataset('/Users/claudia/Documents/Data/20220819-EXPATS-RG.nc')
+                            # calculate accumulated rainfall in mm or kg/m2 over 15 minutes time interval
 
-                    # define domain_IT_CA
-                    lon_min, lon_max, lat_min, lat_max = domain_IT_CA
+                            # convert Ze to RR by applying the Z-R relationship of function ze_to_rr
+                            ds_day["RR"] = (("time", "lat", "lon"), calc_acc_rain_5_min(ds_day["Z_60"].values))
 
-                    # crop msg data to the IT domain (smaller than EXPATS)
-                    ds_msg_IT = ds_msg.where((ds_msg.lat >= lat_min) & 
-                                            (ds_msg.lat <= lat_max) & 
-                                            (ds_msg.lon >= lon_min) & 
-                                            (ds_msg.lon <= lon_max), 
-                                            drop=True)
-                    
-                    # define MSG spatial resolution for the regular grid to be generated
-                    step_deg = 0.04  # step size in degrees for the regular grid
+                            # calculate accumulated rain over 15 min intervals by summing accumulated rain over 5 min intervals
+                            ds_radar_msg = ds_day.resample(time='15T').sum(skipna=True)
+                            
+                            # create 2D lat and 2d lon arrays for radar data
+                            lat_2d_radar, lon_2d_radar = np.meshgrid(ds_radar_msg.lat.values, ds_radar_msg.lon.values, indexing='ij')
+                            
+                            # read one msg file to get temporal and spatial resolution
+                            ds_msg = xr.open_dataset('/Users/claudia/Documents/Data/20220819-EXPATS-RG.nc')
 
-                    # define new lat max e min lon max e min based on the msg cropped data
-                    lat_min = ds_msg_IT.lat.min().values
-                    lat_max = ds_msg_IT.lat.max().values
-                    lon_min = ds_msg_IT.lon.min().values
-                    lon_max = ds_msg_IT.lon.max().values
+                            # define domain_IT_CA for cropping msg data
+                            lon_min, lon_max, lat_min, lat_max = domain_IT_CA
 
-                    # ceate a regular grid for the msg data
-                    lat_arr, lon_arr = generate_regular_grid(lat_min,
-                                                            lat_max,  
-                                                            lon_min, 
-                                                            lon_max, 
-                                                            step_deg,
-                                                            path=None)
-                    
-                    # create 2d arrays of lat lon based on the regular lat lon arrays
-                    lat_reg_grid, lon_reg_grid = np.meshgrid(lat_arr, lon_arr, indexing='ij')
+                            # crop msg data to the IT domain (smaller than EXPATS)
+                            ds_msg_IT = ds_msg.where((ds_msg.lat >= lat_min) & 
+                                                    (ds_msg.lat <= lat_max) & 
+                                                    (ds_msg.lon >= lon_min) & 
+                                                    (ds_msg.lon <= lon_max), 
+                                                    drop=True)
+                            
+                            # define MSG spatial resolution for the regular grid to be generated
+                            step_deg = 0.04  # step size in degrees for the regular grid
 
-                    # define RR_matrix where to store RR resampled
-                    RR_msg = np.zeros((len(ds_radar_msg.time.values), len(lat_arr), len(lon_arr)))
+                            # ceate a regular grid for the msg data
+                            lat_arr, lon_arr = generate_regular_grid(lat_min,
+                                                                    lat_max,  
+                                                                    lon_min, 
+                                                                    lon_max, 
+                                                                    step_deg,
+                                                                    path=None)
+                            
+                            # create 2d arrays of lat lon based on the regular lat lon arrays
+                            lat_reg_grid, lon_reg_grid = np.meshgrid(lat_arr, lon_arr, indexing='ij')
+
+                            # define RR_matrix where to store RR resampled
+                            RR_msg = np.zeros((len(ds_radar_msg.time.values), len(lat_arr), len(lon_arr)))
+                                        
+                            # loop on time stamps to resample 15 min rain amounts to MSG spatial resolution
+                            with Bar('Processing...') as bar: 
                                 
-                    # loop on time stamps to resample 15 min rain amounts to MSG spatial resolution
-                    with Bar('Processing...') as bar: 
-                        
-                        for i_t, time_val in enumerate(ds_radar_msg.time.values):
-                            
-                            print('regrid RR for time ', time_val)
+                                for i_t, time_val in enumerate(ds_radar_msg.time.values):
+                                    
+                                    print('regrid RR for time ', time_val)
 
-                            # setting time obs for loop start
-                            time_loop_start = time.time()
+                                    # setting time obs for loop start
+                                    time_loop_start = time.time()
 
-                            # regrid rain rate date from old radar grid to the new msg grid
-                            RR_msg[i_t, :, :] = regrid_data(ds_radar_msg.lat.values,
-                                                ds_radar_msg.lon.values,
-                                                ds_radar_msg.RR.values[i_t,:,:],
-                                                lat_reg_grid,
-                                                lon_reg_grid)
-                            
-                            time_loop_end = time.time()
-                            print(f'Time taken for loop iteration {i_t}: {time_loop_end - time_loop_start:.2f} seconds')
-                            bar.next()
+                                    # regrid rain rate date from old radar grid to the new msg grid
+                                    RR_msg[i_t, :, :] = regrid_data(lat_2d_radar,
+                                                        lon_2d_radar,
+                                                        ds_radar_msg.RR.values[i_t,:,:],
+                                                        lat_reg_grid,
+                                                        lon_reg_grid)
+                                    
+                                    time_loop_end = time.time()
+                                    print(f'Time taken for loop iteration {i_t}: {time_loop_end - time_loop_start:.2f} seconds')
+                                    bar.next()
 
-                    # store RR_msg into a xarray dataset
-                    ds_RR_msg = xr.Dataset(
-                        {
-                            "RR": (("time", "lat", "lon"), RR_msg[:, :, :],
+                            # store RR_msg into a xarray dataset
+                            ds_RR_msg = xr.Dataset(
                                 {
-                                    "description": "Rain rate data resampled to MSG grid using temporal summation",
-                                    "long_name": "15 minutes rainfall",
-                                    "standard_name": "rainfall_amount",
-                                    "units": "kgm-2",
-                                    "processing_method": "temporal resampling with nansum aggregation",
-                                    "temporal_resolution": "15 minutes",
-                                    "spatial_resolution": "0.04 degrees",
-                                    "valid_min": 0.0,
-                                    "valid_max": 1000.0,
-                                    "_FillValue": np.nan
-                                })
-                        },
-                        coords={
-                            "time": ds_radar_msg.time.values,
-                            "lat": lat_arr, 
-                            "lon": lon_arr,
-                        },
-                        attrs={
-                            "description": "Rain rate from ARPAE data resampled to MSG grid as cumulated over 15 minutes",
-                            "history": "Created on " + str(pd.Timestamp.now()) + " by Claudia Acquistapace, ",
-                            "source": "ARPAE Radar",
-                            "reference history":"data provided by Dr. Virginia Politi from ARPAE",
-                            "created_by": "Claudia Acquistapace",
-                            "created_on": str(pd.Timestamp.now()),
-                            "domain": "IT_CA",
-                            "original_grid": "ARPAE radar polar grid",
-                            "target_grid": "MSG-like regular grid"
-                        }
-                    )
+                                    "RR": (("time", "lat", "lon"), RR_msg[:, :, :],
+                                        {
+                                            "description": "Rain rate data resampled to MSG grid using temporal summation",
+                                            "long_name": "15 minutes rainfall",
+                                            "standard_name": "rainfall_amount",
+                                            "units": "kgm-2",
+                                            "processing_method": "temporal resampling with nansum aggregation",
+                                            "temporal_resolution": "15 minutes",
+                                            "spatial_resolution": "0.04 degrees",
+                                            "valid_min": 0.0,
+                                            "valid_max": 1000.0,
+                                            "_FillValue": np.nan
+                                        })
+                                },
+                                coords={
+                                    "time": ds_radar_msg.time.values,
+                                    "lat": lat_arr, 
+                                    "lon": lon_arr,
+                                },
+                                attrs={
+                                    "description": "Rain rate from ARPAE data resampled to MSG grid as cumulated over 15 minutes",
+                                    "history": "Created on " + str(pd.Timestamp.now()) + " by Claudia Acquistapace, ",
+                                    "source": "ARPAE Radar",
+                                    "reference history":"data provided by Dr. Virginia Politi from ARPAE",
+                                    "created_by": "Claudia Acquistapace",
+                                    "created_on": str(pd.Timestamp.now()),
+                                    "domain": "IT_CA",
+                                    "original_grid": "ARPAE radar polar grid",
+                                    "target_grid": "MSG-like regular grid"
+                                }
+                            )
 
-                    # save to ncdf and compress RR variable to maximum compression
-                    ds_RR_msg.to_netcdf(date_process+'RR_IT_15min_msg_res.nc', encoding={'RR': {'zlib': True, 'complevel': 9}})
-
-
-                    ncdf_radar_gz = date_process+'RR_IT_15min_msg_res.nc.gz'
-  
-                    # gzip the nc file
-                    with open(date_process+'RR_IT_15min_msg_res.nc', 'rb') as f_in:
-                        with gzip.open(date_process+'RR_IT_15min_msg_res.nc.gz', 'wb') as f_out:
-                            shutil.copyfileobj(f_in, f_out)
+                            # save to ncdf and compress RR variable to maximum compression
+                            path_out_nc = "/Users/claudia/Documents/Data/ARPAE_15min_rain_rate/"
+                            ds_RR_msg.to_netcdf(path_out_nc+date_process+'RR_IT_15min_msg_res.nc', encoding={'RR': {'zlib': True, 'complevel': 9}})
+        
+                            # gzip the nc file
+                            with open(path_out_nc+date_process+'RR_IT_15min_msg_res.nc', 'rb') as f_in:
+                                with gzip.open(path_out_nc+date_process+'RR_IT_15min_msg_res.nc.gz', 'wb') as f_out:
+                                    shutil.copyfileobj(f_in, f_out)
+                                    
+                            # remove the local nc file
+                            os.remove(path_out_nc+date_process+'RR_IT_15min_msg_res.nc')
                             
-                    # remove the local nc file
-                    os.remove(date_process+'RR_IT_15min_msg_res.nc')
-                    
-                    # upload the processed file to the new S3 bucket
-                    file_to_upload = os.path.join('/Users/claudia/Github/RADAR_DE/', date_process+'RR_IT_15min_msg_res.nc.gz')
-                    upload_success = upload_file(s3, file_to_upload, s3_bucket_new_name, date_process+'RR_IT_15min_msg_res.nc.gz')
-                    
+                            # upload the processed file to the new S3 bucket
+                            file_to_upload = os.path.join(path_out_nc, date_process+'RR_IT_15min_msg_res.nc.gz')
+                            upload_success = upload_file(s3, file_to_upload, s3_bucket_new_name, date_process+'RR_IT_15min_msg_res.nc.gz')
+                            
 
-                    if upload_success:
-                        print(f"File {date_process+'RR_IT_15min_msg_res.nc.gz'} gzipped and uploaded successfully to bucket {s3_bucket_new_name}.")
-                    else:
-                        print(f"Failed to upload file {date_process+'RR_IT_15min_msg_res.nc'} to bucket {s3_bucket_new_name}.") 
-                    
-                    
+                            if upload_success:
+                                print(f"File {date_process+'RR_IT_15min_msg_res.nc.gz'} gzipped and uploaded successfully to bucket {s3_bucket_new_name}.")
+                            else:
+                                print(f"Failed to upload file {date_process+'RR_IT_15min_msg_res.nc'} to bucket {s3_bucket_new_name}.") 
+                            
+                            
 
 
     

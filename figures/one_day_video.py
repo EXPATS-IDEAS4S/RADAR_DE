@@ -4,7 +4,8 @@ Code to read and plot the video of 1 dday radar images of rain rates
 
 
 
-from readers.file_dirs import path_radolan_DE, path_out
+from matplotlib.colors import ListedColormap
+from readers.file_dirs import path_radolan_DE, path_out, path_arpae_DE, path_nc
 from readers.radar_DWD import read_radar_DWD, read_orography
 import xarray as xr
 import numpy as np
@@ -13,39 +14,95 @@ from datetime import datetime
 import matplotlib.pyplot as plt
 from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
 import cartopy.crs as ccrs
-from figures.domain_info import domain_expats, domain_DE_CA
-from figures.mpl_style import CMAP, plot_cities_expats, plot_local_dfg
+from figures.domain_info import domain_expats, domain_DE_CA, domain_IT_CA
+from figures.mpl_style import CMAP, plot_cities_expats, plot_local_dfg, plot_cities_IT
 import os
 import cartopy.feature as cfeature
+import gzip
+import shutil
 
 
 def main():
     
     
     # set the day to process
-    yy = '2022'
-    mm = '06'
-    dd = '05'
+    yy = '2023'
+    mm = '05'
+    dd = '14'
+    domain = 'IT'  # 'DE' or 'expats'
     date = yy+mm+dd
     
-    # read data
-    data = read_radar_DWD(path_radolan_DE, date)    
+    if domain == 'DE':
+        data = read_radar_DWD(path_radolan_DE, date)    
+    elif domain == 'IT':
+        # dezip from gz file
 
+        with gzip.open(f'{path_nc}{yy}{mm}{dd}_RR_IT_15min_msg_res.nc.gz', 'rb') as f_in:
+            with open(f'{path_nc}{yy}{mm}{dd}_RR_IT_15min_msg_res.nc', 'wb') as f_out:
+                shutil.copyfileobj(f_in, f_out)
+        
+        ncfile = f'{path_nc}{yy}{mm}{dd}_RR_IT_15min_msg_res.nc'
+        # unzip and read file 20230401_RR_IT_15min_msg_res.nc.gz
+        data = xr.open_dataset(ncfile, 
+                              engine='netcdf4', 
+                              decode_times=True)    
+    # read data
     time_dim = len(data.time.values)
     print(np.nanmax(data.RR.values))
     
     for i_time in range(time_dim):
         
         data_day = data.isel(time=i_time)
-        time_string = str(data_day.time.values)
-        plot_radar_map(data_day, time_string)
-   
+        # extract time string of the form yymmdd_HHMM
+        time_string = str(data_day.time.values).replace("-", "").replace(":", "").replace("T", "_")[:13]        
+
+
+        plot_radar_map(data_day, time_string, domain_IT_CA, domain_name='IT')
+
+        #plot_RR_distribution(data_day, time_string, domain_name='IT')
+        
+        # calculate RR percentiles
+        percentiles = np.nanpercentile(data_day.RR.values.flatten(), [95, 96, 97, 98, 99])
+        print(f"Rain rate percentiles at {time_string} UTC:")
+        for p, val in zip([95, 96, 97, 98, 99], percentiles):
+            print(f"  {p}th percentile: {val:.2f} mm/h")    
+
         print(time_string)
 
     # create animated gif video
-    gif_maker(path_out, '20220605_radar', path_out, 60, 'rainrate')
+    gif_maker(path_out, f'{yy}{mm}{dd}_radar', path_out, 60, 'rainrate')
 
-def plot_radar_map(data, time_string):
+def plot_RR_distribution(data, time_string, domain_name='IT'):
+    """
+    function to plot histogram of rain rate distribution
+
+    Args:
+        data (xarray dataset): data from DWD 
+    """
+    RR = data.RR.values.flatten()
+
+    RR = RR[~np.isnan(RR)]
+
+    
+    plt.figure(figsize=(8,6))
+    plt.hist(RR, bins=50, range=(0,1), color='blue', alpha=0.7)
+    plt.xlabel('Rain rate [mm/h]', fontsize=14)
+    plt.ylabel('Frequency', fontsize=14)
+    plt.title(f'Rain rate distribution at {time_string} UTC', fontsize=16)
+    plt.grid()
+    plt.savefig(
+        os.path.join(path_out, time_string+"_rain_rate_distribution.png"),
+        dpi=300,
+        bbox_inches="tight",
+        transparent=True,
+        )
+    # save figure
+    plt.savefig(f'{path_out}{time_string}_rain_rate_distribution.png', dpi=300) 
+    plt.close()
+    return()
+
+
+def plot_radar_map(data, time_string, domain, domain_name='IT'):
     """
     function to plot map of radar data from DWD, in rain rate
 
@@ -61,7 +118,7 @@ def plot_radar_map(data, time_string):
     ax.spines["right"].set_linewidth(3)
     ax.spines["bottom"].set_linewidth(3)
     ax.spines["left"].set_linewidth(3)
-    ax.set_extent(domain_DE_CA)
+    ax.set_extent(domain)
     
     
     gl = ax.gridlines(crs=ccrs.PlateCarree(), draw_labels=True, alpha=0.5)
@@ -71,41 +128,61 @@ def plot_radar_map(data, time_string):
     gl.ylabel_style = {'fontsize': 14}
     
 
-    vmin= 0.
+    # set levels for rain rate from 0 to 20 in steps of 2 mm/h  
+
+    vmin= 0.01
     vmax= 10.
-    var_levels = np.linspace(vmin, vmax, 15)
+    var_levels = np.arange(0., vmax+0.5, 0.5)
+    # define a colormap for rain rate that does not have color for zero rain rate
+    cmap_rr = plt.get_cmap('BuPu_r')
+    #colors = cmap_rr(np.linspace(0, 1, cmap_rr.N))  
+    #colors[0] = [1, 1, 1, 0]  # RGBA, alpha=0 for 0 value
+    #custom_cmap = ListedColormap(colors)
+
     # plot rain rate as filled contours
     lats = data.lat.values
     lons = data.lon.values
     RR = data.RR.values
     
-    RR[RR==0.] = np.nan
+    # set rain rate values < 0.01 to nan
+    RR[RR<0.01] = np.nan
+
+
     # reading orography data from raster file
     ds_or = read_orography()
-    oro_levels = np.linspace(0, 1500, 20)
+    oro_levels = np.linspace(0, 2000, 50)
     oro = ax.contourf(ds_or.lons.values, 
                         ds_or.lats.values, 
                         ds_or.orography.values, 
                         transform=ccrs.PlateCarree(), 
                         levels=oro_levels, 
-                        alpha=1.,
+                        alpha=0.3,
                         cmap='Greys')
 
     mesh_rr = ax.contourf(lons, 
                         lats, 
                         RR, 
-                        cmap='BuPu_r', 
+                        cmap=cmap_rr, 
                         transform=ccrs.PlateCarree(), 
                         vmin=vmin,  
                         vmax=vmax, 
                         levels=var_levels, 
                         extend='max',
-                        alpha=0.6)  
-        
+                        alpha=0.8)  
+    
     cbar = plt.colorbar(mesh_rr, label='Rain rate [mm]', shrink=0.6)
-    plot_cities_expats(ax, 'black', 50)
+    # set colorbar ticks every 2 mm/h
+    cbar.set_ticks(np.arange(0., vmax+0.5, 0.5))
+    cbar.ax.tick_params(labelsize=12)
+    cbar.set_label('Accumulated Rain rate [mm]', fontsize=14)
+    if domain_name == 'DE':
+        plot_cities_expats(ax, 'black', 50)
+    elif domain_name == 'IT':
+        plot_cities_IT(ax, 'black', 50)
+
     ax.add_feature(cfeature.BORDERS, linewidth=1., color='black')
-       
+    ax.add_feature(cfeature.COASTLINE, linewidth=1., color='black')
+
     plt.savefig(
         os.path.join(path_out, time_string+"_rain_rate.png"),
         dpi=300,

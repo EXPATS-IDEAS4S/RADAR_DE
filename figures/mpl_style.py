@@ -48,6 +48,14 @@ def plot_cities_expats(ax, color, symbol_size):
     Jena = [50.92, 11.59]
     Frankfurt = [50.174, 8.62]
     Freiburg = [48.059, 8.05]
+    Padova = [45.4064, 11.8768]
+    Venice = [45.4408, 12.3155]
+    Milan = [45.4642, 9.1900]
+    Bolzano = [46.4981, 11.3548]
+    Bologna = [44.4949, 11.3426]
+    Trento = [46.0667, 11.1167]
+    Ferrara = [44.8353, 11.6198]
+    Ravenna = [44.4184, 12.2035]
     
     # Plot the points
     ax.scatter(Ulm[1], Ulm[0], marker='x', color=color, s=symbol_size, transform=ccrs.PlateCarree())
@@ -59,6 +67,14 @@ def plot_cities_expats(ax, color, symbol_size):
     ax.scatter(Jena[1], Jena[0], marker='x', color=color, s=symbol_size, transform=ccrs.PlateCarree())
     ax.scatter(Frankfurt[1], Frankfurt[0], marker='x', color=color, s=symbol_size, transform=ccrs.PlateCarree())
     ax.scatter(Freiburg[1], Freiburg[0], marker='x', color=color, s=symbol_size, transform=ccrs.PlateCarree())
+    ax.scatter(Padova[1], Padova[0], marker='x', color=color, s=symbol_size, transform=ccrs.PlateCarree())
+    ax.scatter(Venice[1], Venice[0], marker='x', color=color, s=symbol_size, transform=ccrs.PlateCarree())
+    ax.scatter(Milan[1], Milan[0], marker='x', color=color, s=symbol_size, transform=ccrs.PlateCarree())
+    ax.scatter(Bolzano[1], Bolzano[0], marker='x', color=color, s=symbol_size, transform=ccrs.PlateCarree())
+    ax.scatter(Bologna[1], Bologna[0], marker='x', color=color, s=symbol_size, transform=ccrs.PlateCarree())
+    ax.scatter(Trento[1], Trento[0], marker='x', color=color, s=symbol_size, transform=ccrs.PlateCarree())
+    ax.scatter(Ferrara[1], Ferrara[0], marker='x', color=color, s=symbol_size, transform=ccrs.PlateCarree())
+    ax.scatter(Ravenna[1], Ravenna[0], marker='x', color=color, s=symbol_size, transform=ccrs.PlateCarree())    
 
     
     # Plot the names next to the points, adjusted for lower right positioning
@@ -71,7 +87,57 @@ def plot_cities_expats(ax, color, symbol_size):
     ax.text(Jena[1] + 0.02, Jena[0] - 0.02, 'Jena', color=color, transform=ccrs.PlateCarree(), ha='left', va='top')
     ax.text(Frankfurt[1] + 0.02, Frankfurt[0] - 0.02, 'Frankfurt', color=color, transform=ccrs.PlateCarree(), ha='left', va='top')
     ax.text(Freiburg[1] + 0.02, Freiburg[0] - 0.02, 'Freiburg', color=color, transform=ccrs.PlateCarree(), ha='left', va='top')
+    ax.text(Padova[1] + 0.02, Padova[0] - 0.02, 'Padova', color=color, transform=ccrs.PlateCarree(), ha='left', va='top')
+    ax.text(Venice[1] + 0.02, Venice[0] - 0.02, 'Venice', color=color, transform=ccrs.PlateCarree(), ha='left', va='top')
+    ax.text(Milan[1] + 0.02, Milan[0] - 0.02, 'Milan', color=color, transform=ccrs.PlateCarree(), ha='left', va='top')
+    ax.text(Bolzano[1] + 0.02, Bolzano[0] - 0.02, 'Bolzano', color=color, transform=ccrs.PlateCarree(), ha='left', va='top')
+    ax.text(Bologna[1] + 0.02, Bologna[0] - 0.02, 'Bologna', color=color, transform=ccrs.PlateCarree(), ha='left', va='top')
+    ax.text(Trento[1] + 0.02, Trento[0] - 0.02, 'Trento', color=color, transform=ccrs.PlateCarree(), ha='left', va='top')
+    ax.text(Ferrara[1] + 0.02, Ferrara[0] - 0.02, 'Ferrara', color=color, transform=ccrs.PlateCarree(), ha='left', va='top')
+    ax.text(Ravenna[1] + 0.02, Ravenna[0] - 0.02, 'Ravenna', color=color, transform=ccrs.PlateCarree(), ha='left', va='top')    
+    
+    return
 
+    
+def plot_cities_IT(ax, color, symbol_size):
+    
+    """add cities on a plot"""
+    
+    # set cities coordinates
+    trento = [46.0667, 11.1167] #lat, lon
+    bolzano = [46.4981, 11.3548]
+    Padova = [45.4064, 11.8768]
+    Venice = [45.4408, 12.3155]
+    Milan = [45.4642, 9.1900]
+    Bolzano = [46.4981, 11.3548]
+    Bologna = [44.4949, 11.3426]
+    Trento = [46.0667, 11.1167]
+    Turin = [45.0703, 7.6869]
+    Genoa = [44.4056, 8.9463]
+    Florence = [43.7696, 11.2558]
+
+    # Plot the points
+    ax.scatter(Padova[1], Padova[0], marker='x', color=color, s=symbol_size, transform=ccrs.PlateCarree())
+    #ax.scatter(Venice[1], Venice[0], marker='x', color=color, s=symbol_size, transform=ccrs.PlateCarree())
+    ax.scatter(Milan[1], Milan[0], marker='x', color=color, s=symbol_size, transform=ccrs.PlateCarree())
+    ax.scatter(Bolzano[1], Bolzano[0], marker='x', color=color, s=symbol_size, transform=ccrs.PlateCarree())
+    ax.scatter(Bologna[1], Bologna[0], marker='x', color=color, s=symbol_size, transform=ccrs.PlateCarree())
+    ax.scatter(Trento[1], Trento[0], marker='x', color=color, s=symbol_size, transform=ccrs.PlateCarree())
+    ax.scatter(Turin[1], Turin[0], marker='x', color=color, s=symbol_size, transform=ccrs.PlateCarree())
+    ax.scatter(Genoa[1], Genoa[0], marker='x', color=color, s=symbol_size, transform=ccrs.PlateCarree())
+    ax.scatter(Florence[1], Florence[0], marker='x', color=color, s=symbol_size, transform=ccrs.PlateCarree())
+    
+    # Plot the names next to the points, adjusted for lower right positioning
+    ax.text(Padova[1] + 0.02, Padova[0] - 0.02, 'Padova', color=color, transform=ccrs.PlateCarree(), ha='left', va='top')
+    #ax.text(Venice[1] + 0.02, Venice[0] - 0.02, 'Venice', color=color, transform=ccrs.PlateCarree(), ha='left', va='top')
+    ax.text(Milan[1] + 0.02, Milan[0] - 0.02, 'Milan', color=color, transform=ccrs.PlateCarree(), ha='left', va='top')
+    ax.text(Bolzano[1] + 0.02, Bolzano[0] - 0.02, 'Bolzano', color=color, transform=ccrs.PlateCarree(), ha='left', va='top')
+    ax.text(Bologna[1] + 0.02, Bologna[0] - 0.02, 'Bologna', color=color, transform=ccrs.PlateCarree(), ha='left', va='top')
+    ax.text(Trento[1] + 0.02, Trento[0] - 0.02, 'Trento', color=color, transform=ccrs.PlateCarree(), ha='left', va='top')
+    ax.text(Turin[1] + 0.02, Turin[0] - 0.02, 'Turin', color=color, transform=ccrs.PlateCarree(), ha='left', va='top')
+    ax.text(Genoa[1] + 0.02, Genoa[0] - 0.02, 'Genoa', color=color, transform=ccrs.PlateCarree(), ha='left', va='top')
+    ax.text(Florence[1] + 0.02, Florence[0] - 0.02, 'Florence', color=color, transform=ccrs.PlateCarree(), ha='left', va='top') 
+        
     return
 
     

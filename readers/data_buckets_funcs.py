@@ -25,27 +25,38 @@ def list_files_bucket(s3, S3_BUCKET_NAME):
     
 
 
-def check_file_bucket(file2find):
+def check_file_bucket(file2find, domain):
     """code to check if a file is on the bucket
     input:
     file2find: filename with path to find n bucket
+    domain: string, 'DE' or 'IT' for the domain to check the bucket
+    
     return:
     filefound (boolean) true if file is found, false if file is not on the bucket
     """
-    
-    from readers.s3_buckets_credentials import S3_BUCKET_NAME, S3_ACCESS_KEY, S3_SECRET_ACCESS_KEY, S3_ENDPOINT_URL
     from readers.data_buckets_funcs import Initialize_s3_client, upload_file
-    
     import boto3
+
+    if domain == 'DE':
+        from readers.s3_bucket_credentials import S3_BUCKET_NAME, S3_ACCESS_KEY, S3_SECRET_ACCESS_KEY, S3_ENDPOINT_URL
+        bucket_name = S3_BUCKET_NAME
+
+    elif domain == 'IT':
+        from readers.s3_bucket_credentials import S3_ACCESS_KEY, S3_SECRET_ACCESS_KEY, S3_ENDPOINT_URL
+        bucket_name = "expats-radar-italy"
+    else:
+        print('domain not recognized')
+        return(False)
     
     s3 = boto3.client(
-    's3',
-    endpoint_url=S3_ENDPOINT_URL,
-    aws_access_key_id=S3_ACCESS_KEY,
-    aws_secret_access_key=S3_SECRET_ACCESS_KEY)
+        's3',
+        endpoint_url=S3_ENDPOINT_URL,
+        aws_access_key_id=S3_ACCESS_KEY,
+        aws_secret_access_key=S3_SECRET_ACCESS_KEY)
+    
     
     # List the objects in our bucket
-    response = s3.list_objects(Bucket=S3_BUCKET_NAME)
+    response = s3.list_objects(Bucket=bucket_name)
     
     # set flag to false if file is not found
     filefound = False
