@@ -14,6 +14,7 @@ readers/__pycache__/
 readers/s3_bucket_credentials.py
 
 # files monitoring running processes
+log*.txt
 
 # files for presentation and output
 radar_de_process_2023_2022.txt
