@@ -20,15 +20,16 @@ import os
 import cartopy.feature as cfeature
 import gzip
 import shutil
+from geopy.distance import geodesic
 
 
 def main():
     
     
     # set the day to process
-    yy = '2023'
-    mm = '05'
-    dd = '14'
+    yy = '2018'
+    mm = '04'
+    dd = '09'
     domain = 'IT'  # 'DE' or 'expats'
     date = yy+mm+dd
     
@@ -179,9 +180,11 @@ def plot_radar_map(data, time_string, domain, domain_name='IT'):
         plot_cities_expats(ax, 'black', 50)
     elif domain_name == 'IT':
         plot_cities_IT(ax, 'black', 50)
+        plot_ARPAE_radar_ranges(ax)
 
     ax.add_feature(cfeature.BORDERS, linewidth=1., color='black')
     ax.add_feature(cfeature.COASTLINE, linewidth=1., color='black')
+    
 
     plt.savefig(
         os.path.join(path_out, time_string+"_rain_rate.png"),
@@ -194,7 +197,43 @@ def plot_radar_map(data, time_string, domain, domain_name='IT'):
     return()
 
 ### TO DO: 1) change color bar to one with white background, 2) change units 3) resample on satellite time resolution 4) plot together satellite and radar data input
+
+def plot_ARPAE_radar_ranges(ax):
+    """
+    Docstring for plot_ARPAE_radar_ranges
     
+    :param ax: axis from matplotlib to plot the radar ranges
+    :return: None   
+    """
+
+    radar_names = ['San Pietro Capofiume', 'Gattatico']
+    radar_lats = [44.6547, 44.7914]
+    radar_lons = [11.6236, 10.4992]
+    radius_km = 212 # km
+
+    # Bearings
+    angles = np.linspace(0, 360, 361)
+
+
+    # calculate and plot circles for each radar
+    for i in range(len(radar_names)):
+        radar_name = radar_names[i]
+        lat0 = radar_lats[i]
+        lon0 = radar_lons[i]
+
+        lats = []
+        lons = []
+        for a in angles:
+            destination = geodesic(kilometers=radius_km).destination((lat0, lon0), a)
+            lats.append(destination.latitude)
+            lons.append(destination.longitude)
+
+        # plot circle lines
+        ax.plot(lons, lats, color='white', linewidth=1, linestyle='--', transform=ccrs.PlateCarree())
+        ax.scatter(radar_lons[i], radar_lats[i], color='white', s=50, marker='^', transform=ccrs.PlateCarree())
+        
+    return
+
 def gif_maker(image_folder, gif_name, gif_path, gif_duration, channel):
     """
     script to create animated gif from a folder containing images
