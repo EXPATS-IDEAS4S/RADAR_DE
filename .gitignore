@@ -8,7 +8,7 @@ radar_env/
 figures/__pycache__/
 process/__pycache__/
 readers/__pycache__/
-
+old
 
 # file containing credentials
 readers/s3_bucket_credentials.py

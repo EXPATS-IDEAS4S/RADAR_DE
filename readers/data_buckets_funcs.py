@@ -165,7 +165,27 @@ def init_s3():
         aws_secret_access_key=S3_SECRET_ACCESS_KEY, 
     )
 
+def delete_file_from_bucket(s3, bucket_name, file_key):
+    """
+    Deletes a file from the specified S3 bucket.
 
+    Args:
+        s3: Initialized S3 client object.
+        bucket_name (str): Name of the S3 bucket.
+        file_key (str): Key (path) of the file to delete.
+
+    Returns:
+        bool: True if deletion was successful, False otherwise.
+    """
+    try:
+        s3.delete_object(Bucket=bucket_name, Key=file_key)
+        print(f"File {file_key} deleted successfully from bucket {bucket_name}.")
+        return True
+    except ClientError as e:
+        logging.error(e)
+        return False
+    
+    
 
 def read_file_obj(s3, file_path, bucket):
 

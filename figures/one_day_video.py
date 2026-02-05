@@ -27,26 +27,37 @@ def main():
     
     
     # set the day to process
-    yy = '2018'
-    mm = '04'
-    dd = '09'
+    yy = '2025'
+    mm = '05'
+    dd = '20'
     domain = 'IT'  # 'DE' or 'expats'
     date = yy+mm+dd
     
     if domain == 'DE':
         data = read_radar_DWD(path_radolan_DE, date)    
     elif domain == 'IT':
-        # dezip from gz file
 
-        with gzip.open(f'{path_nc}{yy}{mm}{dd}_RR_IT_15min_msg_res.nc.gz', 'rb') as f_in:
-            with open(f'{path_nc}{yy}{mm}{dd}_RR_IT_15min_msg_res.nc', 'wb') as f_out:
-                shutil.copyfileobj(f_in, f_out)
+        # try  dezip from gz file
+        try: 
+            with gzip.open(f'{path_nc}{yy}{mm}{dd}_RR_IT_15min_msg_res.nc.gz', 'rb') as f_in:
+                with open(f'{path_nc}{yy}{mm}{dd}_RR_IT_15min_msg_res.nc', 'wb') as f_out:
+                    shutil.copyfileobj(f_in, f_out)
+        except FileNotFoundError:
+            try:
+                # open nc file directly if gz file not found
+                data = xr.open_dataset(f'{path_nc}{yy}{mm}{dd}_RR_IT_15min_msg_res.nc', 
+                                      engine='netcdf4', 
+                                      decode_times=True)
+            except FileNotFoundError:   
+                print(f"File {path_nc}{yy}{mm}{dd}_RR_IT_15min_msg_res.nc.gz not found.")
+                return
         
         ncfile = f'{path_nc}{yy}{mm}{dd}_RR_IT_15min_msg_res.nc'
         # unzip and read file 20230401_RR_IT_15min_msg_res.nc.gz
         data = xr.open_dataset(ncfile, 
                               engine='netcdf4', 
                               decode_times=True)    
+    
     # read data
     time_dim = len(data.time.values)
     print(np.nanmax(data.RR.values))
@@ -57,6 +68,10 @@ def main():
         # extract time string of the form yymmdd_HHMM
         time_string = str(data_day.time.values).replace("-", "").replace(":", "").replace("T", "_")[:13]        
 
+        print(np.nanmax(data_day.RR.values) 
+              , np.nanmin(data_day.RR.values)
+              , np.nanmean(data_day.RR.values))
+        
 
         plot_radar_map(data_day, time_string, domain_IT_CA, domain_name='IT')
 

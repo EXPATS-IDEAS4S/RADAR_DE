@@ -8,7 +8,7 @@ from figures.one_day_video import gif_maker
 
 def main():
 
-    date = '20230514'
+    date = '20250401'
     gif_name = f"{date}_radar"
     gif_path = path_out
     gif_duration = 100  # duration for gif in ms
