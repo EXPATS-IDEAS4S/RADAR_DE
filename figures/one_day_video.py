@@ -27,9 +27,9 @@ def main():
     
     
     # set the day to process
-    yy = '2025'
-    mm = '05'
-    dd = '20'
+    yy = '2017'
+    mm = '04'
+    dd = '26'
     domain = 'IT'  # 'DE' or 'expats'
     date = yy+mm+dd
     
