@@ -9,7 +9,7 @@ path_arpae_DE = "/data/trade_pc/ARPAE_DE_5min_rain_rate/"
 
 
 # output path for plots
-path_out = "/Users/claudia/Documents/Data/ARPAE_15min_rain_rate/plots/" #'/work/radolan_5min_composites/'
+path_out = "/Users/claudia/Documents/Data/ARPAE_15min_rain_rate/00_plots/" #'/work/radolan_5min_composites/'
 path_nc = "/Users/claudia/Documents/Data/ARPAE_15min_rain_rate/"
 
 
