@@ -167,7 +167,7 @@ def main():
     s3, file_names = read_all_filenames_from_bucket()
 
     # list all years from 2024 to 2014
-    yy_list = [str(year) for year in range(2025, 2016, -1)]
+    yy_list = [str(year) for year in range(2017, 2012, -1)]
     # list all months in a year
     mm_list = [f'{month:02d}' for month in range(4, 10)]
     # list all days in a month
@@ -218,6 +218,7 @@ def main():
 
                             # unzip files, read data and create xr dataset for the entire day
                             ds_list = []
+                            dates_list = []
                             with Bar('Processing...', max=len(data)) as bar: 
                                 for i, file in enumerate(data):
 
@@ -231,12 +232,26 @@ def main():
 
                                     if file_obj is not None:
 
-                                        # decompress gzip file object
-                                        ds = xr.open_dataset(io.BytesIO(gzip.decompress(file_obj)))
-    
-                                        # append to list
-                                        ds_list.append(ds)
+                                        try:
+                                            # decompress gzip file object
+                                            ds = xr.open_dataset(io.BytesIO(gzip.decompress(file_obj)))
+                                            ds_list.append(ds)
+                                            dates_list.append(dates[i])
+                                        except Exception as e:
+                                            print(f"Error reading file {file}: {e}")
+                                            # store date to a log file for further investigation
+                                            with open('log_error_reading_files_ARPAE.txt', 'a') as log_file:
+                                                log_file.write(f"{file}\n")
+
+                                            continue  # skip to the next file
+                                    else:
+                                        print(f"File object for {file} is None, skipping.")
+                                        # store date on a log file for further investigation
+                                        with open('log_missing_file_objects_ARPAE.txt', 'a') as log_file:
+                                            log_file.write(f"{file}\n")
+
                                     bar.next()
+
                             # define date string for the day being processed
                             date_process = f"{yyyy}{mm}{dd}_"
 
@@ -255,7 +270,7 @@ def main():
 
 
                             # add time coordinate
-                            ds_day = ds_day.assign_coords(time=("time", dates))
+                            ds_day = ds_day.assign_coords(time=("time", dates_list))
 
                             # set to nan all missing Z_60 = -20
                             ds_day["Z_60"] = ds_day["Z_60"].where(ds_day["Z_60"] > -20, np.nan)
