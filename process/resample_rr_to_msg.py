@@ -132,7 +132,9 @@ def main():
 
 def process_date(yy, mm, dd, plotting, path_out):
     '''
-    function to read rain rate from dwd data, resample it on the msg temporal (15 min) and spatial (0.04 degrees) resolution, and then store a new netcdf on the small radar domain. It also, if requested by the plotting keyword, produces plots of the rr instantaneous, cumulated over 15 mins, and msg 
+    function to read rain rate from dwd data, resample it on the msg temporal (15 min) and spatial (0.04 degrees) resolution
+      and then store a new netcdf on the small radar domain. It also, if requested by the plotting keyword, produces plots 
+      of the rr instantaneous, cumulated over 15 mins, and msg 
     inputs:
     - yy: string of the year
     - mm: string of the month

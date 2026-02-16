@@ -5,6 +5,12 @@ this script identifies all dates in which radar data from ARPAE:
 - or have a time resolution that is not at 00, 15, 30, 45 minutes
 The dates are logged in a text file for further reprocessing with the code main_arpae now adapted to handle these cases
 
+To run this code:
+- activate the virtual environment with all the necessary libraries installed
+source /Users/claudia/Github/venv/bin/activate 
+
+- run code with python
+python process/find_time_res_radar_files.py
 """
 
 import glob

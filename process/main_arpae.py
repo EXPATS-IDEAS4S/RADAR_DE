@@ -2,9 +2,8 @@
 This code reads and plots radar data from ARPAE 
 
 how to run this code:
+
 python3 -m process.main_arpae
-
-
 
     Info on radar reflectivity contained in ARPAE files:
     long_name:          Radar reflectivity factor
@@ -167,7 +166,7 @@ def main():
     s3, file_names = read_all_filenames_from_bucket()
 
     # list all years from 2024 to 2014
-    yy_list = [str(year) for year in range(2017, 2012, -1)]
+    yy_list = [str(year) for year in range(2014, 2012, -1)]
     # list all months in a year
     mm_list = [f'{month:02d}' for month in range(4, 10)]
     # list all days in a month
@@ -213,7 +212,9 @@ def main():
                             with open('log_no_data_days_ARPAE.txt', 'a') as log_file:
                                 log_file.write(f"{yyyy}-{mm}-{dd}\n")
 
-                            return
+                            # go to next day
+                            continue
+                        
                         else:
 
                             # unzip files, read data and create xr dataset for the entire day
