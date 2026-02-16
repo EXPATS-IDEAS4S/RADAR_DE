@@ -27,9 +27,9 @@ def main():
     
     
     # set the day to process
-    yy = '2017'
-    mm = '04'
-    dd = '26'
+    yy = '2014'
+    mm = '06'
+    dd = '15'
     domain = 'IT'  # 'DE' or 'expats'
     date = yy+mm+dd
     
@@ -270,8 +270,8 @@ def gif_maker(image_folder, gif_name, gif_path, gif_duration, channel):
     
     # read files into the fil elist
     image_array = []
-    print(sorted(glob.glob(path_out+'*.png')))
-    for file in sorted(glob.glob(path_out+'*.png')):
+    print(sorted(glob.glob(image_folder+'*.png')))
+    for file in sorted(glob.glob(image_folder+'*.png')):
                 
         image = Image.open(file)
         image_array.append(image)
