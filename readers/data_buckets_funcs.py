@@ -4,7 +4,7 @@ import os
 import logging
 from botocore.exceptions import ClientError
 from readers.config import *
-
+import pdb
 
 def list_files_bucket(s3, S3_BUCKET_NAME):
     """
@@ -44,6 +44,10 @@ def check_file_bucket(file2find, domain):
     elif domain == 'IT':
         from readers.s3_bucket_credentials import S3_ACCESS_KEY, S3_SECRET_ACCESS_KEY, S3_ENDPOINT_URL
         bucket_name = "expats-radar-italy"
+
+    elif domain == 'CH':
+        from readers.s3_bucket_credentials import S3_ACCESS_KEY, S3_SECRET_ACCESS_KEY, S3_ENDPOINT_URL
+        bucket_name = "radar-ch"
     else:
         print('domain not recognized')
         return(False)
@@ -57,7 +61,7 @@ def check_file_bucket(file2find, domain):
     
     # List the objects in our bucket
     response = s3.list_objects(Bucket=bucket_name)
-    
+
     # set flag to false if file is not found
     filefound = False
     if "Contents" not in response:
@@ -79,13 +83,14 @@ def check_file_bucket(file2find, domain):
 
 
 
-def upload_to_bucket(path_out, filename_ncdf):
+def upload_to_bucket(path_out, filename_ncdf, bucket_name):
     """
     function to upload on a specified S3 bucket the filename ncdf
 
     Args:
         path_out (string): path to the directory where filename_ncdf is located 
         filename_ncdf (string): name of the file to upload on bucket
+        bucket_name (string): name of the bucket where to upload the file
 
     Returns:
         check: boolean, true if file is uploaded, false if not
@@ -94,7 +99,7 @@ def upload_to_bucket(path_out, filename_ncdf):
     import time
     from glob import glob
 
-    from readers.s3_buckets_credentials import S3_BUCKET_NAME, S3_ACCESS_KEY, S3_SECRET_ACCESS_KEY, S3_ENDPOINT_URL
+    from readers.s3_bucket_credentials import S3_ACCESS_KEY, S3_SECRET_ACCESS_KEY, S3_ENDPOINT_URL
     from readers.data_buckets_funcs import Initialize_s3_client, upload_file
 
 
@@ -106,7 +111,7 @@ def upload_to_bucket(path_out, filename_ncdf):
     # calling upload function and return boolean for upload status
     # upload_file(s3_client, file_name, bucket, object_name=None):
     file_to_upload = os.path.join(path_out, filename_ncdf)
-    check = upload_file(s3, file_to_upload, S3_BUCKET_NAME, filename_ncdf)
+    check = upload_file(s3, file_to_upload, bucket_name, filename_ncdf)
     
     # if true, upload done
     if check:
@@ -204,8 +209,11 @@ def read_file_obj(s3, file_path, bucket):
 def list_objects(s3, S3_BUCKET_NAME):
     # List the objects in our bucket
     response = s3.list_objects(Bucket=S3_BUCKET_NAME)
+    items = []
     for item in response['Contents']:
-        print(item['Key'])
+        print(item['Key'])  
+        items.append(item['Key'])
+    return items
     
 
 # method to upload data to the bucket

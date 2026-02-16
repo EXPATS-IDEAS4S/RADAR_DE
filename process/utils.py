@@ -1,3 +1,4 @@
+from datetime import datetime
 import glob
 from scipy.interpolate import griddata
 import xarray as xr
@@ -103,3 +104,32 @@ def is_valid_date(year, month, day):
     except ValueError:
         return False
     
+def extract_date_from_filename_ch(filename):
+    """
+    function to extract date from the filename of swiss radar data 
+    with the following rule:
+      last 5 characters before .zip are yyddd,
+        where yy is the year and 
+        ddd is the day of the year  
+    input:
+        filename: string, name of the file to extract the date from
+    output:  
+        date: string, date extracted from the filename in the format YYYY-MM-DD
+    
+    author: Claudia Acquistapace
+    date: 16 Febbruary 2026
+    email: claudia.acquistapace-at-unipd.it
+    
+    """
+    # extract date from the filename with the following rule: last 5 characters before .zip are yyddd, where yy is the year and ddd is the day of the year
+    yy = '20'+ filename[-5:-3]
+    # read day of the year and convert it to month and day
+    ddd = int(filename[-3:])
+
+    # convert day of the year to month and day including months with 31 days, 30 days and February with 28 or 29 days depending on the year (leap year or not)
+
+    date = datetime.strptime(f"{yy}-{ddd:03d}", "%Y-%j").date()
+    month = date.month
+    day = date.day
+    print(f"date extracted from filename: {yy}-{month:02d}-{day:02d}")
+    return f"{yy}-{month:02d}-{day:02d}"

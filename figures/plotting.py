@@ -122,8 +122,12 @@ def plot_radar_mapV2(data, string_file, path_out):
     """
     function to plot map of radar data from DWD, in rain rate
 
+
     Args:
         data (xarray dataset): data from DWD 
+        string_file (string): string for plot filename
+        path_out (string): path where to save the plot
+
     """
     print(np.nanmax(data.RR.values))
     print(np.nanmin(data.RR.values))
@@ -134,7 +138,7 @@ def plot_radar_mapV2(data, string_file, path_out):
     ax.spines["right"].set_linewidth(3)
     ax.spines["bottom"].set_linewidth(3)
     ax.spines["left"].set_linewidth(3)
-    ax.set_extent(domain_DE_CA)
+    ax.set_extent(domain_expats)
     
     
     gl = ax.gridlines(crs=ccrs.PlateCarree(), draw_labels=True, alpha=0.5)
@@ -151,11 +155,14 @@ def plot_radar_mapV2(data, string_file, path_out):
     lats = data.lat.values
     lons = data.lon.values
     RR = data.RR.values
+    if len(np.shape(RR))==3:
+        RR = RR[0,:,:]
+    
     
     RR[RR==0.] = np.nan
     # reading orography data from raster file
     ds_or = read_orography()
-    oro_levels = np.linspace(0, 1500, 20)
+    oro_levels = np.linspace(0, 3500, 20)
     oro = ax.contourf(ds_or.lons.values, 
                         ds_or.lats.values, 
                         ds_or.orography.values, 
@@ -178,7 +185,9 @@ def plot_radar_mapV2(data, string_file, path_out):
     cbar = plt.colorbar(mesh_rr, label='Rain rate [mm]', shrink=0.6)
     plot_cities_expats(ax, 'black', 50)
     ax.add_feature(cfeature.BORDERS, linewidth=1., color='black')
-       
+
+    # add coastline
+    ax.add_feature(cfeature.COASTLINE.with_scale('50m'), linewidth=1., color='black')
     plt.savefig(
         os.path.join(path_out, string_file+'.png'),
         dpi=300,

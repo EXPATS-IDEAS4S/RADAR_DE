@@ -56,6 +56,12 @@ def plot_cities_expats(ax, color, symbol_size):
     Trento = [46.0667, 11.1167]
     Ferrara = [44.8353, 11.6198]
     Ravenna = [44.4184, 12.2035]
+
+    # ass swiss cities
+    Bern = [46.9481, 7.4474]
+    Lausanne = [46.5197, 6.6323]
+    Zurich = [47.373878, 8.5450984]
+
     
     # Plot the points
     ax.scatter(Ulm[1], Ulm[0], marker='x', color=color, s=symbol_size, transform=ccrs.PlateCarree())
@@ -75,7 +81,9 @@ def plot_cities_expats(ax, color, symbol_size):
     ax.scatter(Trento[1], Trento[0], marker='x', color=color, s=symbol_size, transform=ccrs.PlateCarree())
     ax.scatter(Ferrara[1], Ferrara[0], marker='x', color=color, s=symbol_size, transform=ccrs.PlateCarree())
     ax.scatter(Ravenna[1], Ravenna[0], marker='x', color=color, s=symbol_size, transform=ccrs.PlateCarree())    
-
+    ax.scatter(Bern[1], Bern[0], marker='x', color=color, s=symbol_size, transform=ccrs.PlateCarree())
+    ax.scatter(Lausanne[1], Lausanne[0], marker='x', color=color, s=symbol_size, transform=ccrs.PlateCarree())
+    ax.scatter(Zurich[1], Zurich[0], marker='x', color=color, s=symbol_size, transform=ccrs.PlateCarree())
     
     # Plot the names next to the points, adjusted for lower right positioning
     ax.text(Ulm[1] + 0.02, Ulm[0] - 0.02, 'Ulm', color=color, transform=ccrs.PlateCarree(), ha='left', va='top')
@@ -95,6 +103,9 @@ def plot_cities_expats(ax, color, symbol_size):
     ax.text(Trento[1] + 0.02, Trento[0] - 0.02, 'Trento', color=color, transform=ccrs.PlateCarree(), ha='left', va='top')
     ax.text(Ferrara[1] + 0.02, Ferrara[0] - 0.02, 'Ferrara', color=color, transform=ccrs.PlateCarree(), ha='left', va='top')
     ax.text(Ravenna[1] + 0.02, Ravenna[0] - 0.02, 'Ravenna', color=color, transform=ccrs.PlateCarree(), ha='left', va='top')    
+    ax.text(Bern[1] + 0.02, Bern[0] - 0.02, 'Bern', color=color, transform=ccrs.PlateCarree(), ha='left', va='top')
+    ax.text(Lausanne[1] + 0.02, Lausanne[0] - 0.02, 'Lausanne', color=color, transform=ccrs.PlateCarree(), ha='left', va='top')
+    ax.text(Zurich[1] + 0.02, Zurich[0] - 0.02, 'Zurich', color=color, transform=ccrs.PlateCarree(), ha='left', va='top')   
     
     return
 
