@@ -14,7 +14,7 @@ old
 readers/s3_bucket_credentials.py
 
 # files monitoring running processes
-log*.txt
+log_*.txt
 
 # files for presentation and output
 radar_de_process_2023_2022.txt
@@ -24,3 +24,4 @@ plots/*.mp4
 *.nc
 *.pptx
 *.npy
+
