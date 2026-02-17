@@ -93,7 +93,7 @@ def read_h5_file(file_path, date):
             lat = (1 - xx) * (1 - yy) * LL[0] + xx * (1 - yy) * LR[0] + (1 - xx) * yy * UL[0] + xx * yy * UR[0]
             # Bilinear interpolation for lon
             lon = (1 - xx) * (1 - yy) * LL[1] + xx * (1 - yy) * LR[1] + (1 - xx) * yy * UL[1] + xx * yy * UR[1]
-        
+
             # store data in xarray dataset
             ds = xr.Dataset(
                 data_vars={
@@ -123,5 +123,13 @@ def read_h5_file(file_path, date):
 
     # concatenate data of the day along the time dimension
     ds_day = xr.concat(RR_arr, dim='time')
+
+    # add nan masking to define radar domain
+    domain_mask_array = np.where(ds_day.RR.values[0,:,:] >= 0, 1, 0)
+
+    # add domain mask to the dataset as a variable
+    ds_day = ds_day.assign(domain_mask=(('lat', 'lon'), domain_mask_array)) 
+
+    # add description of domain mask array as attributesx   
 
     return ds_day

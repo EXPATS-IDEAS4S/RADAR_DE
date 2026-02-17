@@ -71,6 +71,15 @@ from process.utils import extract_date_from_filename_ch
 import h5py
 from readers.radars_ch import read_h5_file
 from figures.plotting import plot_radar_mapV2
+from figures.mpl_style import plot_cities_expats
+from readers.radar_DWD import read_orography
+import cartopy.crs as ccrs
+import cartopy.feature as cfeature
+import matplotlib.pyplot as plt
+from figures.domain_info import domain_expats, domain_DE_CA
+import matplotlib.gridspec as gridspec
+from matplotlib.colors import ListedColormap, BoundaryNorm
+
 def main():
 
     # reading list of files from folder
@@ -114,9 +123,19 @@ def main():
     # read all h5 files in the unzipped folder 
     ds_day = read_h5_file(h5_files, date)
 
-    print(ds_day)
+    # plot rain rate
+    plot_radar_mapV2(ds_day, 
+                    string_file=f"radar_ch_{date}", 
+                    path_out="/Users/claudia/Documents/Data/test_radar/")
+    
+    plot_radar_coverage(ds_day,
+                        string_file=f"radar_ch_coverage_{date}", 
+                        path_out="/Users/claudia/Documents/Data/test_radar/")
+
     pdb.set_trace()
     # TO DO 
+
+
 
     """
       - resample to msg time/space grid

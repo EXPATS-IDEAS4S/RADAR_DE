@@ -159,7 +159,7 @@ def plot_radar_mapV2(data, string_file, path_out):
         RR = RR[0,:,:]
     
     
-    RR[RR==0.] = np.nan
+    #RR[RR==0.] = np.nan
     # reading orography data from raster file
     ds_or = read_orography()
     oro_levels = np.linspace(0, 3500, 20)
@@ -197,3 +197,89 @@ def plot_radar_mapV2(data, string_file, path_out):
 
     plt.close()
     return()
+
+
+
+
+def plot_radar_coverage(ds_day, string_file, path_out):
+    """function to plot radar coverage from CH radar data,
+      using the domain mask variable added to the dataset
+
+    Args:
+        data (xarray dataset): data from CH radar, with domain mask variable
+        string_file (string): string for plot filename
+        path_out (string): path where to save the plot
+
+    author: Claudia Acquistapace
+    date: 16 Febbruary 2026
+    email:  claudia.acquistapace-at-unipd.it
+
+    example call:
+    plot_radar_coverage(ds_day,
+                        string_file=f"radar_ch_coverage_{date}", 
+                        path_out="/Users/claudia/Documents/Data/test_radar/")
+
+    """
+
+    # plot domain_mask
+    fig = plt.figure(figsize=(10,10))
+    ax = fig.add_subplot(1, 1, 1, projection=ccrs.PlateCarree())
+    ax.spines["top"].set_linewidth(3)
+    ax.spines["right"].set_linewidth(3)
+    ax.spines["bottom"].set_linewidth(3)
+    ax.spines["left"].set_linewidth(3)
+    ax.set_extent(domain_expats)
+    
+    
+    gl = ax.gridlines(crs=ccrs.PlateCarree(), 
+                      draw_labels=True,
+                        alpha=0.5)
+    gl.top_labels = False
+    gl.right_labels = False
+    gl.xlabel_style = {'fontsize': 14}
+    gl.ylabel_style = {'fontsize': 14}
+    
+    # plot mask domain 
+    lats = ds_day.lat.values
+    lons = ds_day.lon.values
+    mask_domain = ds_day.domain_mask.values.astype(int)  # Ensure integer 0/1
+
+    # Overlay mask_domain on top of orography using pcolormesh
+    # (after orography is plotted, before saving/closing the figure)
+
+    # reading orography data from raster file
+    ds_or = read_orography()
+    oro_levels = np.linspace(0, 3500, 20)
+    oro = ax.contourf(ds_or.lons.values, 
+                        ds_or.lats.values, 
+                        ds_or.orography.values, 
+                        transform=ccrs.PlateCarree(), 
+                        levels=oro_levels, 
+                        alpha=1.,
+                        cmap='Greys')
+    cmap_domain = ListedColormap(['lightgrey', 'yellow'])
+
+    norm = BoundaryNorm([0, 0.5, 1.5], cmap_domain.N)
+    # pcolormesh expects (X, Y, Z) = (lons, lats, data)
+    c = ax.pcolormesh(lons, lats, mask_domain, cmap=cmap_domain, norm=norm, transform=ccrs.PlateCarree())
+    cbar = plt.colorbar(c,
+                        ax=ax,
+                        orientation="horizontal", 
+                        pad=0.02, 
+                        shrink=0.8,
+                        boundaries=BoundaryNorm([0, 0.5, 1.5], cmap_domain.N),
+                        ticks=[0, 1])
+    cbar.ax.set_xticklabels(['no data', 'coverage radar'])
+    plot_cities_expats(ax, 'black', 50)
+    ax.add_feature(cfeature.BORDERS, linewidth=1., color='black')
+    # add coastline
+    ax.add_feature(cfeature.COASTLINE.with_scale('50m'), linewidth=1., color='black')
+    plt.savefig(
+        os.path.join(path_out, f"{string_file}.png"),
+        dpi=300,
+        bbox_inches="tight",
+        transparent=True,
+        )
+
+    plt.close()
+    return None
