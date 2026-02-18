@@ -54,7 +54,7 @@ def read_h5_file(file_path, date):
             # assuming times can be read at hhmmss
             start_time_obj = datetime.strptime(str(start_time)[2:-1], "%H%M%S").time()
             end_time_obj = datetime.strptime(str(end_time)[2:-1], "%H%M%S").time()
-
+            
             # calculating time resolution 
             time_step = abs(start_time_obj.hour*3600 + start_time_obj.minute*60 + start_time_obj.second - (end_time_obj.hour*3600 + end_time_obj.minute*60 + end_time_obj.second))
 
@@ -106,11 +106,11 @@ def read_h5_file(file_path, date):
                     'lon': lon[0, :]
                 },
                 attrs={
-                    'time_resolution': time_step,
+                    'time_resolution': f"{time_step} seconds",
                     'comment': f"time contains the starting time of the {time_step} interval",
                     'author': 'Claudia Acquistapace',
                     'email': 'claudia.acquistapace-at-unipd.it',
-                    'date': '16 Febbruary 2026',
+                    'date': datetime.now().strftime("%Y-%m-%d"),
                     'data source': 'Swiss radar data, read from h5 files with the function read_h5_file in readers/radars_ch.py'
                 }
 
@@ -124,12 +124,23 @@ def read_h5_file(file_path, date):
     # concatenate data of the day along the time dimension
     ds_day = xr.concat(RR_arr, dim='time')
 
+    # sort ds_day by time
+    ds_day = ds_day.sortby('time')
+
+    # set to nan all RR values equal to 0, to avoid plotting them
+    ds_day['RR'] = ds_day['RR'].where(ds_day['RR'] != 0., np.nan)
+
     # add nan masking to define radar domain
     domain_mask_array = np.where(ds_day.RR.values[0,:,:] >= 0, 1, 0)
 
     # add domain mask to the dataset as a variable
     ds_day = ds_day.assign(domain_mask=(('lat', 'lon'), domain_mask_array)) 
 
-    # add description of domain mask array as attributesx   
-
+    # add description of domain mask array as attributes
+    ds_day.domain_mask.attrs['description'] = "mask to define radar domain, with 1 for grid points \n" \
+    "inside the radar domain and 0 for grid points outside the radar domain. The mask is defined based \n" \
+    "on the first time step of the day, assuming that the radar domain does not change during the day. \n" \
+    "The mask is created by setting to 1 all grid points with RR values greater than or equal to 0,\n" \
+    " and to 0 all grid points with RR values less than 0. "
+    
     return ds_day
