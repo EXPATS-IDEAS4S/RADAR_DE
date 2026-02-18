@@ -21,6 +21,12 @@ import time
 import pandas as pd
 import shutil
 import gzip
+import cartopy.crs as ccrs
+import cartopy.feature as cfeature
+import matplotlib.pyplot as plt
+from figures.domain_info import domain_expats, domain_DE_CA
+import matplotlib.gridspec as gridspec
+from matplotlib.colors import ListedColormap, BoundaryNorm
 
 def plot_msg(lons, lats, variable, label, cmap, cbar_title, domain, path_out, key, back_transparent, vmin, vmax):
     """
