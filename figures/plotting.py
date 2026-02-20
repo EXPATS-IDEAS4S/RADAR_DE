@@ -21,6 +21,7 @@ import time
 import pandas as pd
 import shutil
 import gzip
+import cmcrameri.cm as cmr
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
 import matplotlib.pyplot as plt
@@ -180,7 +181,7 @@ def plot_radar_mapV2(data, string_file, path_out):
     mesh_rr = ax.contourf(lons, 
                         lats, 
                         RR, 
-                        cmap='BuPu_r', 
+                        cmap=cmr.buda, 
                         transform=ccrs.PlateCarree(), 
                         vmin=vmin,  
                         vmax=vmax, 

@@ -13,6 +13,8 @@ from readers.radar_DWD import read_orography
 import cartopy.crs as ccrs
 import matplotlib.pyplot as plt
 import cartopy.feature as cfeature
+# import crameri colormaps
+import cmcrameri.cm as cmr
 
 def read_h5_file(file_path, date):
     """
@@ -28,6 +30,7 @@ def read_h5_file(file_path, date):
     author: Claudia Acquistapace
     date: 16 Febbruary 2026
     email: claudia.acquistapace-at-unipd.it
+    note: see bottom of the function fo more info on the files and their naming convention
     """
 
     # loop on files of the day and read data, time stamp and lat lon. store in xarray dataset
@@ -123,16 +126,26 @@ def read_h5_file(file_path, date):
 
     # concatenate data of the day along the time dimension
     ds_day = xr.concat(RR_arr, dim='time')
-
     # sort ds_day by time
     ds_day = ds_day.sortby('time')
-
-    # set to nan all RR values equal to 0, to avoid plotting them
-    ds_day['RR'] = ds_day['RR'].where(ds_day['RR'] != 0., np.nan)
 
     # add nan masking to define radar domain
     domain_mask_array = np.where(ds_day.RR.values[0,:,:] >= 0, 1, 0)
 
+    # calibration factor to add for calibrating RR with rain gauges (summer period, personal comm Francesco Marra)
+    ds_day['RR'] = ds_day['RR'] * 0.87
+
+    # set to nan all RR values equal to 0, to avoid plotting them
+    ds_day['RR'] = ds_day['RR'].where(ds_day['RR'] != 0., np.nan)
+
+    # add rr units as attribute
+    ds_day['RR'].attrs['units'] = 'mm/h'
+    ds_day['RR'].attrs['description'] = "istantaneous rain rate in mm/h, with values equal to 0 set to nan."
+
+    # add comment on lat lon resolution
+    ds_day['lat'].attrs['comment'] = "latitude values of the radar grid, reconstructed from the lat lon information in the h5 file. "
+    ds_day['lon'].attrs['comment'] = "longitude values of the radar grid, reconstructed from the lat lon information in the h5 file. "
+ 
     # add domain mask to the dataset as a variable
     ds_day = ds_day.assign(domain_mask=(('lat', 'lon'), domain_mask_array)) 
 
@@ -142,5 +155,70 @@ def read_h5_file(file_path, date):
     "on the first time step of the day, assuming that the radar domain does not change during the day. \n" \
     "The mask is created by setting to 1 all grid points with RR values greater than or equal to 0,\n" \
     " and to 0 all grid points with RR values less than 0. "
+
+    # add comment with the name of the script used to produce the ds_day dataset
+    ds_day.attrs['comment'] = "dataset created with the function read_h5_file in readers/radars_ch.py"
+    ds_day.attrs['author'] = 'Claudia Acquistapace'
+    ds_day.attrs['email'] = 'claudia.acquistapace-at-unipd.it'
+    ds_day.attrs['date'] = datetime.now().strftime("%Y-%m-%d")
+    ds_day.attrs['Github repository'] = 'https://github.com/claudia-acquistapace/RADAR_DE'
+    ds_day.attrs['data source'] = 'Swiss radar data, read from h5 files with the function read_h5_file in readers/radars_ch.py'
     
+
+
+    """
+    info on files:
+
+    From the size of the file, you can get
+      an idea whether it was clear sky 
+      (minimum size) or with (widespread) 
+      precipitation.
+    The data set covers all day;
+     The domain of (each) raster file 
+     is 710 columns by 640 rows, 
+     hich is 454400 pixels. 
+     Only ~350400 pixels are 
+     under the umbrella of the 
+     5 radars, the others are 
+     out of range (NaN).
+    
+    Regarding the conformal grid:
+    Bottom-left corner has kilometric
+      coordinate  (255 East, -180 North).
+    Top-right corner has kilometric 
+    coordinate  (965 East, +480 North).
+     
+    By way of example, the coordinate
+      of Bern, the Swiss Capital 
+      is 600 East (“Y”), 200 North (“X”).
+    Inside Switzerland, such coordinates 
+    are always positive; furthermore, Y>X.
+
+    Files with the extension 801 are coded
+      on 8 bits, i.e. there are at most 
+      256 different values (classes), 
+      even though in the HDF5 file 
+      they appear as floating point numbers. 
+      The 001 files, with the name RZCflt,
+        are 32 bits floating point data 
+        throughout the processing, i.e.
+          they should be slightly more 
+          precise as there is no rescaling 
+          to 8bit/256 classes. Although
+            from a quantitative point
+              of view there difference 
+              shall be minimal, when you 
+              have both options, I would
+                use the 001 files.
+
+    files naming convention:
+    RZC16001
+    yyddd
+    year 2016 
+    day 1 i.e. jan 1 
+
+    RZC22162
+    year 2022 
+    day 162 i.e. jun 11 
+    """
     return ds_day

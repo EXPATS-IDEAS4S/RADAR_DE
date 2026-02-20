@@ -131,5 +131,29 @@ def extract_date_from_filename_ch(filename):
     date = datetime.strptime(f"{yy}-{ddd:03d}", "%Y-%j").date()
     month = date.month
     day = date.day
-    print(f"date extracted from filename: {yy}-{month:02d}-{day:02d}")
+    #print(f"date extracted from filename: {yy}-{month:02d}-{day:02d}")
     return f"{yy}-{month:02d}-{day:02d}"
+
+
+def select_months_of_interest(files_list, file_path, months):
+    """function to select only files from the months of interest, since \n
+    the radar data are not good in winter
+    """
+    dates = []
+    for file in files_list:
+        filename = file.split("/")[-1].split(".zip")[0]
+        date = extract_date_from_filename_ch(filename)
+        dates.append(date)
+    dates = np.array(dates)
+    files_list = np.array(files_list)
+
+    # select only files from the months of interest
+    selected_files = []
+    selected_dates = []
+    for month in months:
+        month_files = files_list[np.array([date.split("-")[1] == month for date in dates])]
+        selected_files.extend(month_files)
+        selected_dates.extend([date for date in dates if date.split("-")[1] == month])
+
+    print(selected_dates)
+    return selected_files   
