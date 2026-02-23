@@ -61,12 +61,6 @@ def main():
             print("******************************************************")
             print("******************************************************")
 
-    return check
-
-
-    # list files on bucket and local directory
-    s3 = Initialize_s3_client(S3_ENDPOINT_URL, S3_ACCESS_KEY, S3_SECRET_ACCESS_KEY)
-    files_bucket = list_files_bucket(s3, data_bucket_name)
 
 
 if __name__ == "__main__":

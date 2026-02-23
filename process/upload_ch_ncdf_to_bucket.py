@@ -7,12 +7,6 @@ email: claudia.acquistapace-at-unipd.it
 """
 import os
 from glob import glob
-import subprocess
-
-import s3
-from process.utils import extract_date_from_filename_ch
-import pdb
-
 from readers.data_buckets_funcs import init_s3, list_objects, upload_to_bucket
 
 
@@ -31,6 +25,7 @@ def main():
     file_strings = ["*radar_swisse_5min_res.nc.gz", "*RR_CH_15min_msg_res.nc.gz"]
     print("******************************************************") 
 
+    # loop on file types and bucket of destination
     for data_path, bucket_name, file_string in zip(data_paths, bucket_names, file_strings):
 
         file_to_upload = sorted(glob(os.path.join(data_path, "*"+file_string)))
@@ -67,3 +62,7 @@ def main():
                     print(f"file {filename} not moved on bucket {bucket_name}")
                 print("******************************************************")
                 print("******************************************************")
+
+
+if __name__ == "__main__":
+    main()
