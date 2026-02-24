@@ -86,7 +86,7 @@ def main():
 
     # initialize the S3 client to upload the data to bucket
     s3 = Initialize_s3_client(S3_ENDPOINT_URL, S3_ACCESS_KEY, S3_SECRET_ACCESS_KEY)
-    bucket_name = "expats-radar-germany"
+    bucket_name = "expats-radar-de-test"# "expats-radar-germany"
 
     # list files on bucket and local directory
     files_bucket = list_files_bucket(s3, bucket_name)
@@ -99,7 +99,6 @@ def main():
     # find files that are in the local directory but not on the bucket
     files_to_upload = [f for f in files_ncdf_folder if os.path.basename(f) not in filenames]
     print(f"files to upload: {files_to_upload}")
-    pdb.set_trace() 
 
     # loop to upload the files on bucket
     for file in files_to_upload:
