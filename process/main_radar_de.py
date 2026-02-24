@@ -25,7 +25,7 @@ import glob
 from scipy.interpolate import griddata
 import xarray as xr
 from readers.file_dirs import path_radolan_DE
-from readers.radar_DWD import read_radar_DWD, read_orography
+from readers.radar_DWD import read_orography
 import pdb
 import numpy as np
 import scipy
@@ -74,7 +74,7 @@ def main():
                 if is_valid_date(yy, mm, dd):
                     
                     # check if the file is already on the bucket expats-radar-germany,
-                    file_exist = check_file_bucket(yy+mm+dd+'_RR_15min_msg_res.nc.gz')
+                    file_exist = check_file_bucket(yy+mm+dd+'_RR_15min_msg_res.nc.gz', "DE")
                     
                     if file_exist:
                         print('file already exists on bucket expats-radar-germany - skipping date:', yy, mm, dd)
@@ -93,13 +93,16 @@ def main():
                         # check if there folder exists, otherwise unzip tar.gz file
                         if not os.path.exists(path_tar+'/'+yy+'/'):
                             
-                            print('unzipping tar.gz file for year ', yy)
+                            print('processin year ', yy)
 
                             # read file tar.gz for the year from bucket and untat
                             S3_tar = init_s3()
                             bucket_name = "dwd-tar-files"
                             tar_filename = 'YW2017.002_'+yy+'_netcdf.tar.gz'
-                            if not os.path.exists(path_tar+'/'+yy+'/'):
+                            if not os.path.exists(path_tar+yy+'/'):
+
+                                # create folder for the year if it does not exist
+                                os.makedirs(path_tar+'/'+yy+'/')
                                 print(f"Downloading {tar_filename} from bucket...")
                                 download_file(S3_tar, bucket_name, tar_filename, path_tar+'/'+yy+'/'+tar_filename)
                             else:
@@ -153,7 +156,7 @@ def main():
 
 
 
-def process_date(yy, mm, dd, file, file, plotting, path_out):
+def process_date(yy, mm, dd, file, plotting, path_out):
     '''
     function to read rain rate from dwd data, resample it on the msg temporal (15 min) and spatial (0.04 degrees) resolution
       and then store a new netcdf on the small radar domain. It also, if requested by the plotting keyword, produces plots 

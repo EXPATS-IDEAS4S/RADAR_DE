@@ -3,7 +3,7 @@ import glob
 from scipy.interpolate import griddata
 import xarray as xr
 from readers.file_dirs import path_radolan_DE
-from readers.radar_DWD import read_radar_DWD, read_orography
+from readers.radar_DWD import read_orography
 import pdb
 import numpy as np
 import scipy

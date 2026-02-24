@@ -6,7 +6,7 @@ Code to read and plot the video of 1 dday radar images of rain rates
 
 from matplotlib.colors import ListedColormap
 from readers.file_dirs import path_radolan_DE, path_out, path_arpae_DE, path_nc
-from readers.radar_DWD import read_radar_DWD, read_orography
+from readers.radar_DWD import read_orography
 import xarray as xr
 import numpy as np
 import glob
@@ -34,7 +34,7 @@ def main():
     date = yy+mm+dd
     
     if domain == 'DE':
-        data = read_radar_DWD(path_radolan_DE, date)    
+        data = xr.open_dataset(f'{path_radolan_DE}{date}_RR_DE_15min_msg_res.nc')
     elif domain == 'IT':
 
         # try  dezip from gz file
