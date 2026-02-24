@@ -31,8 +31,10 @@ def main():
     print('files on bucket', files_on_bucket)
 
     print(f"moving DWD tar files on bucket {data_bucket_name}")
+    
     # tar folder path for DWD radar data
-    DWD_archive_path = "/Volumes/Matteo_USB_/radar_germany/"
+    #DWD_archive_path = "/Volumes/Matteo_USB_/radar_germany/"
+    DWD_archive_path = "/data/trade_pc/radolan_DE_5min_rain_rate/"
 
     file_list = glob(os.path.join(DWD_archive_path, "*.tar.gz"))
     print(" files to upload ", file_list)

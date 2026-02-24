@@ -29,7 +29,7 @@ from readers.radar_DWD import read_orography
 import pdb
 import numpy as np
 import scipy
-from readers.data_buckets_funcs import download_from_s3
+from readers.data_buckets_funcs import download_from_s3, list_files_bucket
 from figures.domain_info import domain_expats, domain_DE_CA
 from figures.mpl_style import plot_cities_expats
 import cartopy.crs as ccrs
@@ -50,6 +50,10 @@ from process.utils import generate_regular_grid, regrid_data, is_valid_date
 
 def main():
 
+    # set keyword to decide if plotting or not
+    plotting = False
+
+
     # download_from_s3()
     # loop on all days of
     # set the day to process
@@ -64,60 +68,74 @@ def main():
     
     # loop on all years, months, days to find yy mm dd for processing
     for yy in yy_list:
+        print('processin year ', yy)
         for mm in mm_list:
+            print('processin month ', mm)
             for dd in dd_list:
+                print('processin day ', dd)
                 
                 # print the date to process
-                print(yy, mm, dd)
+                print("date", yy, mm, dd)
                 
                 # process only if the date is valid
                 if is_valid_date(yy, mm, dd):
                     
-                    # check if the file is already on the bucket expats-radar-germany,
-                    file_exist = check_file_bucket(yy+mm+dd+'_RR_15min_msg_res.nc.gz', "DE")
-                    
-                    if file_exist:
+                    # read file list from the bucket
+                    s3 = init_s3()
+                    file_bucket_list = list_files_bucket(s3, "expats-radar-germany")
+                    file_to_find = yy+mm+dd+'_RR_15min_msg_res.nc.gz'
+
+                    # check if filename is in file_bucket_list, if yes set file_exist to True, otherwise False
+                    if file_to_find in [obj['Key'] for obj in file_bucket_list]:
                         print('file already exists on bucket expats-radar-germany - skipping date:', yy, mm, dd)
-                        continue
-                    else: 
-                        
+                    else:
                         print('generating ncdf file for ', yy+mm+dd)
-                        
-                        # set keyword to decide if plotting or not
-                        plotting = False
                         
                         # set path output for ncdf and plots
                         #path_out = '/net/ostro/radolan_5min_composites/'
-                        path_tar = '/home/claudia/temp_data/'
-                        
-                        # check if there folder exists, otherwise unzip tar.gz file
-                        if not os.path.exists(path_tar+'/'+yy+'/'):
-                            
-                            print('processin year ', yy)
+                        path_tar = '/data/trade_pc/radolan_DE_5min_rain_rate/'
+                        dest_path_untar = '/data/trade_pc/radolan_DE_5min_rain_rate/'+yy+'/'
 
-                            # read file tar.gz for the year from bucket and untat
+                        # check if there folder exists, otherwise unzip tar.gz file
+                        if not os.path.exists(dest_path_untar):
+
+                            # creating tar folder for the year if it does not exist
+                            os.makedirs(dest_path_untar)
+
+                            # read file tar.gz for the year from bucket and untar
                             S3_tar = init_s3()
                             bucket_name = "dwd-tar-files"
                             tar_filename = 'YW2017.002_'+yy+'_netcdf.tar.gz'
-                            if not os.path.exists(path_tar+yy+'/'):
 
-                                # create folder for the year if it does not exist
-                                os.makedirs(path_tar+'/'+yy+'/')
+                            # ceck if the file was downloaded already, if not download it, otherwise skip download
+                            if not os.path.exists(path_tar+'/'+tar_filename):
+
                                 print(f"Downloading {tar_filename} from bucket...")
-                                download_file(S3_tar, bucket_name, tar_filename, path_tar+'/'+yy+'/'+tar_filename)
+                                download_file(S3_tar, bucket_name, tar_filename, path_tar+'/'+tar_filename)
                             else:
                                 print(f"{tar_filename} already exists locally, skipping download.")
 
                             # unzip the tar.gz file, upzipping generates /mm/ folders 
-                            print('unzipping file ', tar_filename)
-                            shutil.unpack_archive(path_tar+'/'+yy+'/'+tar_filename, path_tar+'/'+yy+'/')
+                            # check if folder with year and months exists, if not unzip the tar.gz file, otherwise skip unzipping
+                            if os.path.exists(dest_path_untar+'/09/'):
+                                print(f"Folder {dest_path_untar} already exists, skipping unzipping.")
+                            else:
+                                print('unzipping file ', tar_filename)
+                                shutil.unpack_archive(path_tar+'/'+tar_filename, dest_path_untar)
+
+                            # remove unpacked months folders 01 02 03 10 11 12 which are not needed for processing
+                            for month in ['01', '02', '03', '10', '11', '12']:
+                                if os.path.exists(dest_path_untar+'/'+month+'/'):
+                                    print('removing month folder ', month)
+                                    shutil.rmtree(dest_path_untar+'/'+month+'/')
+                            
                             
                         # check that radar file from DWD exists
-                        if os.path.exists(path_tar+'/'+yy+'/'+mm+'/YW_2017.002_'+yy+mm+dd+'.nc'):
+                        if os.path.exists(dest_path_untar+'/'+mm+'/YW_2017.002_'+yy+mm+dd+'.nc'):
                             
                             print('radolan file already unzipped - running processing')
-                            radolan_file = path_tar+'/'+yy+'/'+mm+'/YW_2017.002_'+yy+mm+dd+'.nc'
-                            path_out = path_tar+'/'+yy+'/'+mm+'/'
+                            radolan_file = dest_path_untar+'/'+mm+'/YW_2017.002_'+yy+mm+dd+'.nc'
+                            path_out = "/data/trade_pc/radolan_DE_5min_rain_rate/ncdf/"
                             
                             # run processing to create interpolated radolan radar data on msg time/space res. returns filename created and flag if upload successful
                             ncdf_radar_gz, check = process_date(yy, mm, dd, radolan_file, plotting, path_out)
@@ -145,15 +163,14 @@ def main():
                             break
 
         # remove the tar.gz file to save space
-        if os.path.exists(path_tar+'/'+yy+'/'+tar_filename):
+        if os.path.exists(path_tar+'/'+tar_filename):
             print('removing tar.gz file to save space')
-            os.remove(path_tar+'/'+yy+'/'+tar_filename)
+            os.remove(path_tar+'/'+tar_filename)
         
-        # remove the unzipped folder to save space
-        if os.path.exists(path_tar+'/'+yy+'/'):
-            print('removing unzipped folder to save space')
-            shutil.rmtree(path_tar+'/'+yy+'/')  
-
+        # remove monht folder 
+        if os.path.exists(path_tar+'/'+yy+'/'+mm):
+            print('removing month folder ', mm)
+            shutil.rmtree(path_tar+'/'+yy+'/'+mm)
 
 
 def process_date(yy, mm, dd, file, plotting, path_out):
@@ -189,7 +206,7 @@ def process_date(yy, mm, dd, file, plotting, path_out):
     ds_radar = xr.open_dataset(file)  
 
     # reading a random existing file from msg to get resolution
-    ds_msg = xr.open_dataset('/home/claudia/codes/RADAR_DE/20220819-EXPATS-RG.nc')
+    ds_msg = xr.open_dataset('/data/sat/msg/netcdf/parallax/2022/08/20220819-EXPATS-RG.nc')
 
     # resample ds_RR_msg to the msg time resolution of 15 minutes. RR values are summer over the time interval to get rain amount over 15 minutes
     ds_radar_msg = ds_radar.resample(time='15T').sum(skipna=True)
