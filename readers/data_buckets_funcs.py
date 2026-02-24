@@ -26,7 +26,8 @@ def list_files_bucket(s3, S3_BUCKET_NAME):
 
 
 def check_file_bucket(file2find, domain):
-    """code to check if a file is on the bucket
+    """code to check if a file is on the destination bucket alredy processed, to avoid 
+    reprocessing and reuploading the same file on the bucket.
     input:
     file2find: filename with path to find n bucket
     domain: string, 'DE' or 'IT' for the domain to check the bucket
@@ -38,8 +39,8 @@ def check_file_bucket(file2find, domain):
     import boto3
 
     if domain == 'DE':
-        from readers.s3_bucket_credentials import S3_BUCKET_NAME, S3_ACCESS_KEY, S3_SECRET_ACCESS_KEY, S3_ENDPOINT_URL
-        bucket_name = S3_BUCKET_NAME
+        from readers.s3_bucket_credentials import S3_ACCESS_KEY, S3_SECRET_ACCESS_KEY, S3_ENDPOINT_URL
+        bucket_name = "expats-radar-germany"    
 
     elif domain == 'IT':
         from readers.s3_bucket_credentials import S3_ACCESS_KEY, S3_SECRET_ACCESS_KEY, S3_ENDPOINT_URL
@@ -238,6 +239,26 @@ def upload_file(s3_client, file_name, bucket, object_name=None):
         logging.error(e)
         return False
     return True
+
+def download_file(s3_client, bucket, object_name, local_file):
+    """Download a file from an S3 bucket
+
+    input:
+        - s3_client: s3 bucket initialized to download from
+        - bucket: string with bucket name to download from
+        - object_name: filename string to download
+        - local_file: destination full path including filename
+    :return: True if file was downloaded, else False
+    """
+    try:
+        with open(local_file, "wb") as f:
+            s3_client.download_fileobj(bucket, object_name, f)
+        #s3_client.download_file(bucket, object_name, local_file)
+    except ClientError as e:
+        logging.error(e)
+        return False
+    return True
+
 
 # function to download data from bucket
 def download_from_s3(outpath, S3_ACCESS_KEY, S3_SECRET_ACCESS_KEY, S3_ENDPOINT_URL, S3_BUCKET_NAME):
