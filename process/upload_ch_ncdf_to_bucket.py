@@ -15,14 +15,14 @@ def main():
     # reading list of files from folder
     five_min_path = "/Users/claudia/Documents/Data/RADAR_SVIZZERA/netcdf/5_minutes/"
     fifteen_min_path = "/Users/claudia/Documents/Data/RADAR_SVIZZERA/netcdf/15_minutes/"
-    data_paths = [five_min_path, fifteen_min_path]
+    data_paths = [fifteen_min_path, five_min_path]
     # data bucket names
     five_min_bucket_name = "radar-ch"
     fifteen_min_bucket_name = "expats-radar-swisse"
-    bucket_names = [five_min_bucket_name, fifteen_min_bucket_name]
+    bucket_names = [fifteen_min_bucket_name, five_min_bucket_name]
 
     # list all files  in the folder (these are the files with 32 bits floating point data)  
-    file_strings = ["*radar_swisse_5min_res.nc.gz", "*RR_CH_15min_msg_res.nc.gz"]
+    file_strings = ["*RR_CH_15min_msg_res.nc.gz", "*radar_swisse_5min_res.nc.gz",]
     print("******************************************************") 
 
     # loop on file types and bucket of destination
