@@ -26,7 +26,7 @@ def main():
     bucket_names = [fifteen_min_bucket_name, five_min_bucket_name]
 
     # list all files  in the folder (these are the files with 32 bits floating point data)  
-    file_strings = ["*RR_CH_15min_msg_res.nc.gz", "*radar_swisse_5min_res.nc.gz"]
+    file_strings = [ "*RR_CH_15min_msg_res.nc.gz", "*radar_swisse_5min_res.nc.gz"]
     print("******************************************************") 
 
     # loop on file types and bucket of destination

@@ -10,13 +10,13 @@ def list_files_bucket(s3, bucket_name):
     """
     script to list files in the bucket
     - s3: bucket to be checked
-    
+    - bucket_name: name of the bucket to list files from
     """
+    
     # Pagination to get all objects
     paginator = s3.get_paginator('list_objects_v2')
     pages = paginator.paginate(Bucket=bucket_name)
 
-    print(pages)
     all_objects = []
     for page in pages:
         if "Contents" in page:
@@ -26,11 +26,12 @@ def list_files_bucket(s3, bucket_name):
 
     print(f"Total objects in bucket: {len(all_objects)}")
 
+    print(f"Total objects in bucket: {len(all_objects)}")
+
     #files present in the bucket
     all_objects_names = set([obj['Key'].split('/')[0] for obj in all_objects])
 
     return all_objects_names
-    
 
 
 def check_file_bucket(file2find, domain):
@@ -67,7 +68,6 @@ def check_file_bucket(file2find, domain):
         aws_access_key_id=S3_ACCESS_KEY,
         aws_secret_access_key=S3_SECRET_ACCESS_KEY)
     
-    
     # List the objects in our bucket
     response = s3.list_objects(Bucket=bucket_name)
 
@@ -75,7 +75,7 @@ def check_file_bucket(file2find, domain):
     filefound = False
     if "Contents" not in response:
         print(f"No files on bucket")
-        
+        return False
     
     # loop on files found on bucket
     for obj in response["Contents"]:
@@ -215,9 +215,9 @@ def read_file_obj(s3, file_path, bucket):
         return None
 
 
-def list_objects(s3, S3_BUCKET_NAME):
+def list_objects(s3, s3_bucket_name):
     # List the objects in our bucket
-    response = s3.list_objects(Bucket=S3_BUCKET_NAME)
+    response = s3.list_objects(Bucket=s3_bucket_name)
     items = []
     for item in response['Contents']:
         print(item['Key'])  
@@ -269,7 +269,7 @@ def download_file(s3_client, bucket, object_name, local_file):
 
 
 # function to download data from bucket
-def download_from_s3(outpath, S3_ACCESS_KEY, S3_SECRET_ACCESS_KEY, S3_ENDPOINT_URL, S3_BUCKET_NAME):
+def download_from_s3(outpath, s3_access_key, s3_secret_access_key, s3_endpoint_url, s3_bucket_name):
     import os
     import boto3
     import logging
@@ -280,9 +280,9 @@ def download_from_s3(outpath, S3_ACCESS_KEY, S3_SECRET_ACCESS_KEY, S3_ENDPOINT_U
     
     s3 = boto3.client(
         's3',
-        endpoint_url=S3_ENDPOINT_URL,
-        aws_access_key_id=S3_ACCESS_KEY,
-        aws_secret_access_key=S3_SECRET_ACCESS_KEY
+        endpoint_url=s3_endpoint_url,
+        aws_access_key_id=s3_access_key,
+        aws_secret_access_key=s3_secret_access_key
     )
     
     os.makedirs(outpath, exist_ok=True)
