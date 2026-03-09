@@ -6,22 +6,30 @@ from botocore.exceptions import ClientError
 from readers.config import *
 import pdb
 
-def list_files_bucket(s3, S3_BUCKET_NAME):
+def list_files_bucket(s3, bucket_name):
     """
     script to list files in the bucket
     - s3: bucket to be checked
     
     """
-    # List the objects in our bucket
-    response = s3.list_objects(Bucket=S3_BUCKET_NAME)
-    
-    # set flag to false if file is not found
-    filefound = False
-    if "Contents" not in response:
-        print(f"No files on bucket")
-        return([])
-    else:
-        return(response["Contents"])
+    # Pagination to get all objects
+    paginator = s3.get_paginator('list_objects_v2')
+    pages = paginator.paginate(Bucket=bucket_name)
+
+    print(pages)
+    all_objects = []
+    for page in pages:
+        if "Contents" in page:
+            for obj in page['Contents']:
+                print(obj['Key'])  # Only print the Key
+            all_objects.extend(page["Contents"])
+
+    print(f"Total objects in bucket: {len(all_objects)}")
+
+    #files present in the bucket
+    all_objects_names = set([obj['Key'].split('/')[0] for obj in all_objects])
+
+    return all_objects_names
     
 
 
