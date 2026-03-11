@@ -18,8 +18,7 @@ from readers.arcohub_credentials import username, access_key
 def main():
 
 
-    dataset_url = f"https://{username}:{access_key}@api.arcodatahub.com/S3/italian-radar-dpc-sri.zarr"
-    
+    dataset_url = f"https://{username}:{access_key}@api.arcodatahub.com/S3/italian-radar-dpc-sri.zarr"    
     ds = xr.open_dataset(dataset_url, engine="zarr")
 
     print(ds.info())
@@ -28,5 +27,3 @@ def main():
 if __name__ == "__main__":
     
     main()
-
-
