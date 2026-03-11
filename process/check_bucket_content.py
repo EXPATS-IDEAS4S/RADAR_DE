@@ -13,7 +13,7 @@ to run the code, activate the venv and run the script with python3 -m process.ch
 
 def main():
     
-    bucket_name = "expats-radar-swisse"
+    bucket_name = "radar-ch"
 
     # initialize S3 client
     s3 = init_s3()

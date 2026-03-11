@@ -13,6 +13,7 @@ import os
 from glob import glob
 from readers.data_buckets_funcs import init_s3, list_objects, upload_to_bucket
 
+import pdb
 
 def main():
 
@@ -26,7 +27,7 @@ def main():
     bucket_names = [fifteen_min_bucket_name, five_min_bucket_name]
 
     # list all files  in the folder (these are the files with 32 bits floating point data)  
-    file_strings = [ "*RR_CH_15min_msg_res.nc.gz", "*radar_swisse_5min_res.nc.gz"]
+    file_strings = [ "_RR_CH_15min_msg_res.nc.gz", "RR_CH_5min_msg_res.nc.gz"]
     print("******************************************************") 
 
     # loop on file types and bucket of destination
@@ -36,7 +37,7 @@ def main():
         print(f"files in the folder {data_path}: {file_to_upload}")
         print(f"number of files in the folder {data_path}: {len(file_to_upload)}")
         print("******************************************************")
-
+        pdb.set_trace()
         # read list of files on the bucket
         s3 = init_s3()
         files_on_bucket = list_objects(s3, bucket_name)
