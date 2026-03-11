@@ -12,6 +12,8 @@ old
 
 # file containing credentials
 readers/s3_bucket_credentials.py
+readers/arcohub_credentials.py
+
 
 # files monitoring running processes
 log_*.txt
