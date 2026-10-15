@@ -12,6 +12,7 @@ old
 
 # file containing credentials
 readers/s3_bucket_credentials.py
+readers/config.py
 readers/arcohub_credentials.py
 
 
