@@ -1,20 +1,29 @@
 # environments
 .sat_enviroment
 radar_env/
-
+.venv
 
 
 # Byte-compiled / optimized / DLL files
 figures/__pycache__/
 process/__pycache__/
 readers/__pycache__/
-
+old
 
 # file containing credentials
-credentials.py
-readers/s3_buckets_credentials.py
+readers/s3_bucket_credentials.py
+readers/arcohub_credentials.py
 
 
 # files monitoring running processes
+log_*.txt
+
+# files for presentation and output
 radar_de_process_2023_2022.txt
 bash_script_out.txt
+plots/*.png
+plots/*.mp4
+*.nc
+*.pptx
+*.npy
+
