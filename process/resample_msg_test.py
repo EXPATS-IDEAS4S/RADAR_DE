@@ -27,73 +27,91 @@ from time import sleep
 from progress.bar import Bar
 import time
 import pandas as pd
-
+import tarfile
+import shutil
 
 def main():
 
-    # download_from_s3()
-    # loop on all days of
-    # set the day to process
-    
-    # list all years from 2024 to 2014
-    yy_list = [str(year) for year in range(2023, 2021, -1)]
-    # list all months in a year
-    mm_list = [f'{month:02d}' for month in range(4, 9)]
-    # list all days in a month
-    dd_list = [f'{day:02d}' for day in range(1, 32)]
+    yy_list = [str(year) for year in range(2013, 2014, 1)]
+    mm_list = [f"{month:02d}" for month in range(4, 10)]
+    dd_list = [f"{day:02d}" for day in range(1, 32)]
     print(yy_list, mm_list, dd_list)
-    
-    # loop on all years, months, days to find yy mm dd for processing
+
     for yy in yy_list:
+
+        # --------------------
+        # 1. check yearly tar
+        # --------------------
+        tarfile_path = f"/data/trade_pc/radolan_DE_5min_rain_rate/YW2017.002_{yy}_netcdf.tar.gz"
+        extract_root = f"/data/trade_pc/radolan_DE_5min_rain_rate/{yy}"
+
+        # if not os.path.exists(tarfile_path):
+        #     print(f"❌ Yearly archive missing: {tarfile_path}, skipping year {yy}")
+        #     continue
+
+        # ensure year folder exists
+        os.makedirs(extract_root, exist_ok=True)
+
+        # open tar once
+        try:
+            tar = tarfile.open(tarfile_path, "r:gz")
+            tar_members = {os.path.basename(m.name): m for m in tar.getmembers() if m.isfile()}
+        except Exception as e:
+            print(f"❌ Could not open {tarfile_path}: {e}")
+            continue
+
         for mm in mm_list:
             for dd in dd_list:
-                
-                # print the date to process
-                print(yy, mm, dd)
-                
-                # process only if the date is valid
-                if is_valid_date(yy, mm, dd):
-                    
-                    # check if the file is already on the bucket
-                    file_exist = check_file_bucket(yy+mm+dd+'_RR_15min_msg_res.nc')
-                    
-                    if file_exist:
-                        print('file already exists on bucket - skipping date:', yy, mm, dd)
-                        continue
-                    else: 
-                        
-                        print('generating ncdf file for ', yy+mm+dd)
-                        
-                        # set keyword to decide if plotting or not
-                        plotting = False
-                        
-                        # set path out
-                        path_out = '/net/ostro/radolan_5min_composites/'
-                    
-                        # check that radar file from DWD exists 
-                        if os.path.exists('/data/trade_pc/radolan_DE_5min_rain_rate/'+yy+'/'+mm+'/YW_2017.002_'+yy+mm+dd+'.nc'):
-                            
-                            # run processing to create interpolated radolan radar data on msg time/space res. returns filename created
-                            ncdf_radar = process_date(yy, mm, dd, plotting, path_out)
+                if not is_valid_date(yy, mm, dd):
+                    continue
 
-                            # call function to transfer data to bucket, returns true if transfer is complete
-                            check = upload_to_bucket(path_out, ncdf_radar)
-                            
-                        else:
-                            # if file radolan does not exist, print message and continue to next day
-                            print('radolan file missing - go to next day')
-                            continue
-                        
-                        # check if file was uploaded
-                        if check:
-                            print('file uploaded to bucket')
-                            
-                            # remove ncdf file produced
-                            #os.remove(path_out+ncdf_radar)
-                            
-                        else:
-                            print('file not uploaded to bucket - abort')
-                            break
+                print("Processing date:", yy, mm, dd)
+                target_file = yy + mm + dd + "_RR_15min_msg_res.nc"
+
+                if check_file_bucket(target_file):
+                    print("✅ Already on bucket:", target_file)
+                    continue
+
+                # expected daily nc filename
+                daily_nc_filename = f"YW_2017.002_{yy}{mm}{dd}.nc"
+                daily_nc_path = os.path.join(extract_root, mm, daily_nc_filename)
+
+                # 2. ensure daily file exists (extract if not)
+                if not os.path.exists(daily_nc_path):
+                    member = tar_members.get(daily_nc_filename)
+                    if member is None:
+                        print(f"⚠ {daily_nc_filename} not found in archive, skipping date")
+                        continue
+                    os.makedirs(os.path.dirname(daily_nc_path), exist_ok=True)
+                    tar.extract(member, path=os.path.dirname(daily_nc_path))
+                    print(f"✅ Extracted {daily_nc_filename}")
+
+                # 3. process + upload
+                plotting = False
+                path_out = "/net/ostro/radolan_5min_composites/"
+                ncdf_radar = process_date(yy, mm, dd, plotting, path_out)
+                check = upload_to_bucket(path_out, ncdf_radar)
+
+                if check:
+                    print("✅ Uploaded to bucket")
+                    # os.remove(path_out + ncdf_radar)  # optional cleanup
+                else:
+                    print("❌ Upload failed, aborting this year")
+                    break
+
+        # close tar after finishing year
+        tar.close()
+
+        # --------------------
+        # 4. cleanup extracted folder
+        # --------------------
+        if os.path.exists(extract_root):
+            try:
+                shutil.rmtree(extract_root)
+                print(f"🧹 Cleaned up extracted folder {extract_root}")
+            except Exception as e:
+                print(f"⚠ Could not remove {extract_root}: {e}")
+
 
 
 
