@@ -1,4 +1,4 @@
 #!/bin/bash
-# command to launch nohup ./run_resample.sh > bash_script_out.txt &
-source .venv/bin/activate
-python3 process/resample_rr_to_msg.py > radar_de_process_2020_2018.txt
+#source radoln/bin/activate
+python3 process/resample_msg_test.py > radar_de_process_2013.txt
+#nohup 509501
